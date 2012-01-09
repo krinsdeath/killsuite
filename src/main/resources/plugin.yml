@@ -1,0 +1,16 @@
+name: DeathCounter
+main: net.krinsoft.deathcounter.DeathCounter
+version: 3.0
+author: krinsdeath
+load: startup
+
+commands:
+  deathcounter:
+    description: Main command for DeathCounter
+    usage: /<command> [options]...
+    aliases:
+    - dc
+    - stats
+  contract:
+    description: Draw up a contract for a player bounty
+    usage: /<command> [options]...

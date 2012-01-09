@@ -1,0 +1,6 @@
+[submodule "lib/allpay"]
+	path = lib/allpay
+	url = https://github.com/krinsdeath/AllPay.git
+[submodule "lib/commandhandler"]
+	path = lib/commandhandler
+	url = https://github.com/PneumatiCraft/CommandHandler.git
