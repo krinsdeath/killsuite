@@ -6,7 +6,7 @@
 
     <groupId>net.krinsoft</groupId>
     <artifactId>deathcounter</artifactId>
-    <version>1.0</version>
+    <version>3.0</version>
     <name>DeathCounter</name>
 
     <repositories>
@@ -107,10 +107,19 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>me.ashtheking.currency</groupId>
             <artifactId>MultiCurrency</artifactId>
             <version>0.09</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ca.agnate</groupId>
+            <artifactId>EconXP</artifactId>
+            <version>1.0.0</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
