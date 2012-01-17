@@ -3,20 +3,26 @@ package net.krinsoft.deathcounter;
 import com.fernferret.allpay.AllPay;
 import com.fernferret.allpay.GenericBank;
 import com.pneumaticraft.commandhandler.CommandHandler;
+import net.krinsoft.deathcounter.commands.DebugCommand;
+import net.krinsoft.deathcounter.commands.LeaderCommand;
 import net.krinsoft.deathcounter.commands.PermissionsHandler;
 import net.krinsoft.deathcounter.commands.StatsCommand;
 import net.krinsoft.deathcounter.listeners.EntityListener;
 import net.krinsoft.deathcounter.listeners.PlayerListener;
 import net.krinsoft.deathcounter.listeners.ServerListener;
+import net.krinsoft.deathcounter.listeners.WorldListener;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,12 +38,15 @@ public class DeathCounter extends JavaPlugin {
     private final static Logger LOGGER = Logger.getLogger("DeathCounter");
     private boolean debug = false;
     private boolean economy = false;
+    private boolean contract = false;
     private boolean report = true;
+    private List<String> worlds = new ArrayList<String>();
     private int saveTask;
+    
+    private FileConfiguration leaderboards;
 
     private GenericBank bank;
-    
-    private PermissionsHandler permissionsHandler;
+
     private CommandHandler commandHandler;
     
     private Manager manager;
@@ -46,13 +55,7 @@ public class DeathCounter extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
-        getConfig().options().copyDefaults(true);
-        saveConfig();
-
-        debug = getConfig().getBoolean("plugin.debug", false);
-        economy = getConfig().getBoolean("plugin.economy", false);
-        report = getConfig().getBoolean("plugin.report", true);
+        registerConfig();
 
         if (economy) {
             if (validateAllPay()) {
@@ -72,6 +75,7 @@ public class DeathCounter extends JavaPlugin {
         EntityListener eListener = new EntityListener(this);
         PlayerListener pListener = new PlayerListener(this);
         ServerListener sListener = new ServerListener(this);
+        WorldListener wListener = new WorldListener(this);
         PluginManager pm = getServer().getPluginManager();
         // entity death; for kill tracking
         pm.registerEvent(Event.Type.ENTITY_DEATH, eListener, Event.Priority.Monitor, this);
@@ -82,11 +86,14 @@ public class DeathCounter extends JavaPlugin {
         // server listener for economy plugins
         pm.registerEvent(Event.Type.PLUGIN_ENABLE, sListener, Event.Priority.Monitor, this);
         pm.registerEvent(Event.Type.PLUGIN_DISABLE, sListener, Event.Priority.Monitor, this);
+        // world listener for auto-importing
+        pm.registerEvent(Event.Type.WORLD_LOAD, wListener, Event.Priority.Monitor, this);
         
         saveTask = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
-                DeathCounter.instance.getTracker().save();
+                getTracker().save();
+                saveLeaders();
             }
         }, 300, 300);
         
@@ -95,6 +102,7 @@ public class DeathCounter extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        saveLeaders();
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
         tracker.save();
@@ -115,16 +123,43 @@ public class DeathCounter extends JavaPlugin {
         return commandHandler.locateAndRunCommand(sender, arguments);
     }
 
+    public void registerConfig() {
+        getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+        
+        getLeaders().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/leaders.yml")));
+        getLeaders().options().copyDefaults(true);
+        saveLeaders();
+        
+        debug = getConfig().getBoolean("plugin.debug", false);
+        economy = getConfig().getBoolean("plugin.economy", false);
+        contract = getConfig().getBoolean("plugin.contracts", false);
+        report = getConfig().getBoolean("plugin.report", true);
+        worlds = getConfig().getStringList("plugin.exclude_worlds");
+        saveConfig();
+    }
+
     private void registerCommands() {
-        this.permissionsHandler = new PermissionsHandler(this);
-        this.commandHandler = new CommandHandler(this, this.permissionsHandler);
-        this.commandHandler.registerCommand(new StatsCommand(this));
-        //this.commandHandler.registerCommand(new ContractCommand(this));
+        PermissionsHandler permissionsHandler = new PermissionsHandler(this);
+        commandHandler = new CommandHandler(this, permissionsHandler);
+        commandHandler.registerCommand(new StatsCommand(this));
+        commandHandler.registerCommand(new LeaderCommand(this));
+        commandHandler.registerCommand(new DebugCommand(this));
+        if (contract) {
+            //commandHandler.registerCommand(new ContractCommand(this));
+        }
     }
     
     public void log(String message) {
         message = "[" + this + "] " + message;
         LOGGER.info(message);
+    }
+    
+    public void debug(boolean val) {
+        getConfig().set("plugin.debug", val);
+        debug = val;
+        saveConfig();
     }
     
     public void debug(String message) {
@@ -142,9 +177,73 @@ public class DeathCounter extends JavaPlugin {
             }
             p.sendMessage(message + ".");
         }
+        updateLeaderboards(p, m);
+    }
+    
+    public void displayLeaderboards(CommandSender s, Monster m) {
+        if (m == null) { return; }
+        s.sendMessage("=== Leaderboards: " + m.getFancyName() + " ===");
+        try {
+            int place = 1;
+            String eKiller;
+            int eKills;
+            List<String> leaders = getLeaders().getStringList(m.getName());
+            if (!leaders.isEmpty()) {
+                for (String entry : leaders) {
+                    eKiller = entry.split(":")[0];
+                    eKills = Integer.parseInt(entry.split(":")[1]);
+                    s.sendMessage(ChatColor.GOLD + "" + place + ") " + ChatColor.GREEN + eKiller + ChatColor.WHITE + " - " + ChatColor.AQUA + eKills);
+                    place++;
+                }
+            }
+        } catch (NullPointerException e) {
+            debug("Something went wrong.");
+        } catch (NumberFormatException e) {
+            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
+        } catch (IndexOutOfBoundsException e) {
+            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
+        }
+    }
+    
+    private void updateLeaderboards(Player p, Monster m) {
+        try {
+            String eKiller;
+            int eKills;
+            int kills = manager.getKiller(p.getName()).get(m.getName());
+            List<String> leaders = getLeaders().getStringList(m.getName());
+            if (leaders.isEmpty()) {
+                debug("Leader list was empty for " + m.getName());
+                leaders.add(0, p.getName() + ":" + kills);
+            }
+            for (int i = -1; i < leaders.size(); i++) {
+                if (i+1 > leaders.size() && i+1 <= 4) {
+                    debug("Adding '" + p.getName() + ":" + kills +"' to list");
+                    leaders.add(i+1, p.getName() + ":" + kills);
+                    break;
+                }
+                String[] a = leaders.get(i+1).split(":");
+                if (a[0].equals(p.getName())) {
+                    leaders.set(i+1, p.getName() + ":" + kills);
+                    break;
+                }
+                eKills = Integer.parseInt(a[1]);
+                if (kills > eKills) {
+                    leaders.add(i+1, p.getName() + ":" + kills);
+                    break;
+                }
+            }
+            getLeaders().set(m.getName(), leaders.subList(0, (leaders.size() > 4 ? 4 : leaders.size())));
+        } catch (NullPointerException e) {
+            debug("Something went wrong.");
+        } catch (NumberFormatException e) {
+            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
+        } catch (IndexOutOfBoundsException e) {
+            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
+        }
     }
     
     public boolean validateAllPay() {
+        if (bank != null) { return true; }
         double allpayVersion = 3.1;
         AllPay allpay = new AllPay(this, "[" + this + "] ");
         log("Validating AllPay at v" + allpayVersion + "...");
@@ -182,5 +281,33 @@ public class DeathCounter extends JavaPlugin {
     public Manager getManager() {
         return manager;
     }
+    
+    protected FileConfiguration getLeaders() {
+        if (leaderboards == null) {
+            leaderboards = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "leaders.yml"));
+        }
+        return leaderboards;
+    }
+    
+    public void saveLeaders() {
+        try {
+            leaderboards.save(new File(getDataFolder(), "leaders.yml"));
+        } catch (IOException e) {
+            debug("Error saving file 'leaders.yml'");
+        }
+    }
+    
+    public boolean validWorld(String world) {
+        return !worlds.contains(world);
+    }
 
+    public double diminishReturn(Player killer, double amount) {
+        int ret = getConfig().getInt("economy.diminish.return");
+        int depth = getConfig().getInt("economy.diminish.depth");
+        int player = (int) Math.floor(killer.getLocation().getY());
+        double diminish = ((depth - player) * ret);
+        diminish = ((diminish > 0 ? diminish : 0) / 100);
+        amount = (amount - (amount * (diminish)));
+        return (amount > 0 ? amount : 0);
+    }
 }

@@ -21,9 +21,9 @@ public class MySQLDatabase implements Database {
         this.plugin = plugin;
         ConfigurationSection conf = plugin.getConfig().getConfigurationSection("database");
         this.connectionURL = "jdbc:mysql://" +
-                conf.getString("hostname") +
+                conf.getString("hostname") + ":" + conf.getString("port") +
                 "/" + conf.getString("database") +
-                "?user=" + conf.getString("username") +
+                "?user=" + conf.getString("user") +
                 "?password=" + conf.getString("password");
         try {
             Class.forName("com.mysql.jdbc.Driver");

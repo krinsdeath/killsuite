@@ -10,7 +10,12 @@ commands:
     usage: /<command> [options]...
     aliases:
     - dc
-    - stats
+  stats:
+    description: Show the statistics for the command sender or his specified target
+    usage: /<command> [target] [-aomp]
+  leaders:
+    description: Show the leaderboards for the specified monster
+    usage: /<command> [monster]
   contract:
     description: Draw up a contract for a player bounty
     usage: /<command> [options]...
