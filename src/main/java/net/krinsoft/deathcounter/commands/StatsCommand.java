@@ -48,6 +48,10 @@ public class StatsCommand extends DeathCommand {
                 }
             } else {
                 target = plugin.getServer().getPlayer(flag);
+                if (target == null) {
+                    target = sender;
+                    sender.sendMessage(ChatColor.RED + "That target did not exist.");
+                }
             }
         }
         if (!target.equals(sender) && !sender.hasPermission("deathcounter.stats.other")) {
