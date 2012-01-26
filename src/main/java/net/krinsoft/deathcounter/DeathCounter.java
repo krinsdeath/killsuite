@@ -82,7 +82,7 @@ public class DeathCounter extends JavaPlugin {
         // player events; dynamic player loading
         pm.registerEvent(Event.Type.PLAYER_JOIN, pListener, Event.Priority.Monitor, this);
         pm.registerEvent(Event.Type.PLAYER_QUIT, pListener, Event.Priority.Monitor, this);
-        pm.registerEvent(Event.Type.PLAYER_KICK, pListener, Event.Priority.Monitor, this);
+        //pm.registerEvent(Event.Type.PLAYER_KICK, pListener, Event.Priority.Monitor, this);
         // server listener for economy plugins
         pm.registerEvent(Event.Type.PLUGIN_ENABLE, sListener, Event.Priority.Monitor, this);
         pm.registerEvent(Event.Type.PLUGIN_DISABLE, sListener, Event.Priority.Monitor, this);

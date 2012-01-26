@@ -1,5 +1,6 @@
 package net.krinsoft.deathcounter;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class Manager {
     
     public void register(Killer player) {
         killers.put(player.getName(), player);
+        plugin.debug(player.getName() + " was registered.");
     }
     
     public void register(String player) {
@@ -29,6 +31,7 @@ public class Manager {
     
     public void unregister(String player) {
         killers.remove(player);
+        plugin.debug(player + " was unregistered.");
     }
     
     public Killer getKiller(String player) {
