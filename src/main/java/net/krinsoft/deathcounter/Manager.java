@@ -1,6 +1,5 @@
 package net.krinsoft.deathcounter;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;

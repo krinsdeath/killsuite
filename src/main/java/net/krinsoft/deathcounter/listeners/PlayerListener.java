@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 /**
  * @author krinsdeath
  */
+@SuppressWarnings("unused")
 public class PlayerListener implements org.bukkit.event.Listener {
     private DeathCounter plugin;
     

@@ -76,7 +76,6 @@ public class DeathCounter extends JavaPlugin {
         ServerListener sListener = new ServerListener(this);
         WorldListener wListener = new WorldListener(this);
         PluginManager pm = getServer().getPluginManager();
-        // entity death; for kill tracking
         pm.registerEvents(eListener, this);
         pm.registerEvents(pListener, this);
         pm.registerEvents(sListener, this);
@@ -134,7 +133,7 @@ public class DeathCounter extends JavaPlugin {
     }
 
     private void registerCommands() {
-        PermissionsHandler permissionsHandler = new PermissionsHandler(this);
+        PermissionsHandler permissionsHandler = new PermissionsHandler();
         commandHandler = new CommandHandler(this, permissionsHandler);
         commandHandler.registerCommand(new StatsCommand(this));
         commandHandler.registerCommand(new LeaderCommand(this));
@@ -200,7 +199,6 @@ public class DeathCounter extends JavaPlugin {
     
     private void updateLeaderboards(Player p, Monster m) {
         try {
-            String eKiller;
             int eKills;
             int kills = manager.getKiller(p.getName()).get(m.getName());
             List<String> leaders = getLeaders().getStringList(m.getName());

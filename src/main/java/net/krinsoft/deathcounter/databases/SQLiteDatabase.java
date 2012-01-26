@@ -11,6 +11,7 @@ import java.util.Map;
 /**
  * @author krinsdeath
  */
+@SuppressWarnings("unused")
 public class SQLiteDatabase implements Database {
     private DeathCounter plugin;
     private String connectionURL;
@@ -223,4 +224,6 @@ public class SQLiteDatabase implements Database {
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             plugin.getManager().register(fetch(p.getName()));
         }
-    }}
+    }
+
+}

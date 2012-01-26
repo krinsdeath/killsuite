@@ -16,6 +16,7 @@ import java.util.List;
 /**
  * @author krinsdeath
  */
+@SuppressWarnings("unused")
 public class EntityListener implements org.bukkit.event.Listener {
     private DeathCounter plugin;
     
@@ -24,7 +25,7 @@ public class EntityListener implements org.bukkit.event.Listener {
     }
 
     @EventHandler(event = EntityDeathEvent.class, priority = EventPriority.NORMAL)
-    public void entityDeath(EntityDeathEvent event) {
+    void entityDeath(EntityDeathEvent event) {
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
 

@@ -8,6 +8,7 @@ import org.bukkit.event.world.WorldLoadEvent;
 /**
  * @author krinsdeath
  */
+@SuppressWarnings("unused")
 public class WorldListener implements org.bukkit.event.Listener {
     private DeathCounter plugin;
     

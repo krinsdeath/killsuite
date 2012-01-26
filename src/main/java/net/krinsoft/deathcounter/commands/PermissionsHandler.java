@@ -1,7 +1,6 @@
 package net.krinsoft.deathcounter.commands;
 
 import com.pneumaticraft.commandhandler.PermissionsInterface;
-import net.krinsoft.deathcounter.DeathCounter;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -10,11 +9,6 @@ import java.util.List;
  * @author krinsdeath
  */
 public class PermissionsHandler implements PermissionsInterface {
-    private DeathCounter plugin;
-    
-    public PermissionsHandler(DeathCounter plugin) {
-        this.plugin = plugin;
-    }
 
     @Override
     public boolean hasPermission(CommandSender sender, String node, boolean isOpRequired) {

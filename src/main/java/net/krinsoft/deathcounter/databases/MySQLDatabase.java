@@ -13,6 +13,7 @@ import java.util.Map;
 /**
  * @author krinsdeath
  */
+@SuppressWarnings("unused")
 public class MySQLDatabase implements Database {
     private DeathCounter plugin;
     private String connectionURL;
@@ -228,7 +229,6 @@ public class MySQLDatabase implements Database {
     
     private void loadKillers(Statement state) throws SQLException {
         plugin.debug("Fetching players...");
-        String query = "SELECT * FROM `killers`;";
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             plugin.getManager().register(fetch(p.getName()));
         }

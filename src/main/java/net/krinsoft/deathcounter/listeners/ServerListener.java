@@ -12,6 +12,7 @@ import java.util.Arrays;
 /**
  * @author krinsdeath
  */
+@SuppressWarnings("unused")
 public class ServerListener implements org.bukkit.event.Listener {
     private DeathCounter plugin;
     

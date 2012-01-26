@@ -1,7 +1,5 @@
 package net.krinsoft.deathcounter;
 
-import org.bukkit.configuration.ConfigurationSection;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,8 +54,6 @@ public class Killer {
         if (this == o) { return true; }
         if (this.getClass() != o.getClass()) { return false; }
         Killer killer = (Killer) o;
-        if (killer.hashCode() == this.hashCode()) { return true; }
-        if (killer.toString().equals(this.toString())) { return true; }
-        return false;
+        return killer.hashCode() == this.hashCode() || killer.toString().equals(this.toString());
     }
 }

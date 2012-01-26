@@ -4,7 +4,6 @@ import net.krinsoft.deathcounter.databases.Database;
 import net.krinsoft.deathcounter.databases.MySQLDatabase;
 import net.krinsoft.deathcounter.databases.SQLiteDatabase;
 import net.krinsoft.deathcounter.databases.YamlDatabase;
-import org.bukkit.entity.Player;
 
 /**
  * @author krinsdeath
