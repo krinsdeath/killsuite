@@ -17,7 +17,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -78,17 +77,11 @@ public class DeathCounter extends JavaPlugin {
         WorldListener wListener = new WorldListener(this);
         PluginManager pm = getServer().getPluginManager();
         // entity death; for kill tracking
-        pm.registerEvent(Event.Type.ENTITY_DEATH, eListener, Event.Priority.Monitor, this);
-        // player events; dynamic player loading
-        pm.registerEvent(Event.Type.PLAYER_JOIN, pListener, Event.Priority.Monitor, this);
-        pm.registerEvent(Event.Type.PLAYER_QUIT, pListener, Event.Priority.Monitor, this);
-        //pm.registerEvent(Event.Type.PLAYER_KICK, pListener, Event.Priority.Monitor, this);
-        // server listener for economy plugins
-        pm.registerEvent(Event.Type.PLUGIN_ENABLE, sListener, Event.Priority.Monitor, this);
-        pm.registerEvent(Event.Type.PLUGIN_DISABLE, sListener, Event.Priority.Monitor, this);
-        // world listener for auto-importing
-        pm.registerEvent(Event.Type.WORLD_LOAD, wListener, Event.Priority.Monitor, this);
-        
+        pm.registerEvents(eListener, this);
+        pm.registerEvents(pListener, this);
+        pm.registerEvents(sListener, this);
+        pm.registerEvents(wListener, this);
+
         saveTask = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {

@@ -5,6 +5,8 @@ import net.krinsoft.deathcounter.Monster;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 
@@ -14,15 +16,15 @@ import java.util.List;
 /**
  * @author krinsdeath
  */
-public class EntityListener extends org.bukkit.event.entity.EntityListener {
+public class EntityListener implements org.bukkit.event.Listener {
     private DeathCounter plugin;
     
     public EntityListener(DeathCounter plugin) {
         this.plugin = plugin;
     }
 
-    @Override
-    public void onEntityDeath(EntityDeathEvent event) {
+    @EventHandler(event = EntityDeathEvent.class, priority = EventPriority.NORMAL)
+    public void entityDeath(EntityDeathEvent event) {
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
 

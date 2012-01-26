@@ -1,35 +1,30 @@
 package net.krinsoft.deathcounter.listeners;
 
 import net.krinsoft.deathcounter.DeathCounter;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  * @author krinsdeath
  */
-public class PlayerListener extends org.bukkit.event.player.PlayerListener {
+public class PlayerListener implements org.bukkit.event.Listener {
     private DeathCounter plugin;
     
     public PlayerListener(DeathCounter plugin) {
         this.plugin = plugin;
     }
-    
-    @Override
-    public void onPlayerJoin(PlayerJoinEvent event) {
+
+    @EventHandler(event = PlayerJoinEvent.class, priority = EventPriority.MONITOR)
+    public void playerJoin(PlayerJoinEvent event) {
         plugin.getManager().register(event.getPlayer().getName());
     }
-    
-    @Override
-    public void onPlayerQuit(PlayerQuitEvent event) {
+
+    @EventHandler(event = PlayerQuitEvent.class, priority = EventPriority.MONITOR)
+    public void playerQuit(PlayerQuitEvent event) {
         plugin.getTracker().update(event.getPlayer().getName());
         plugin.getManager().unregister(event.getPlayer().getName());
     }
     
-    @Override
-    public void onPlayerKick(PlayerKickEvent event) {
-        if (event.isCancelled()) { return; }
-        plugin.getTracker().update(event.getPlayer().getName());
-        plugin.getManager().unregister(event.getPlayer().getName());
-    }
 }
