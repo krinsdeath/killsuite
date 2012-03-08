@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  *
@@ -34,15 +33,18 @@ import java.util.logging.Logger;
 public class DeathCounter extends JavaPlugin {
     // public static instance handle
     protected static DeathCounter instance;
-    private final static Logger LOGGER = Logger.getLogger("DeathCounter");
     private boolean debug = false;
     private boolean economy = false;
     private boolean contract = false;
     private boolean report = true;
     private List<String> worlds = new ArrayList<String>();
     private int saveTask;
-    
+
+    private FileConfiguration configuration;
+    private File configFile;
+
     private FileConfiguration leaderboards;
+    private File leaderFile;
 
     private GenericBank bank;
 
@@ -87,7 +89,7 @@ public class DeathCounter extends JavaPlugin {
                 getTracker().save();
                 saveLeaders();
             }
-        }, 300, 300);
+        }, 300, 300 * 20);
         
         log("Enabled successfully.");
     }
@@ -116,19 +118,36 @@ public class DeathCounter extends JavaPlugin {
     }
 
     public void registerConfig() {
-        getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
-        getConfig().options().copyDefaults(true);
-        saveConfig();
-        
-        getLeaders().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/leaders.yml")));
-        getLeaders().options().copyDefaults(true);
-        saveLeaders();
-        
+        configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
+            getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
+            getConfig().options().copyDefaults(true);
+            saveConfig();
+        }
+        if (getConfig().get("economy.monsters.ocelot") == null) {
+            List<Double> list = new ArrayList<Double>();
+        }
+
+        leaderFile = new File(getDataFolder(), "leaders.yml");
+        if (!leaderFile.exists()) {
+            getLeaders().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/leaders.yml")));
+            getLeaders().options().copyDefaults(true);
+            saveLeaders();
+        }
+        if (getLeaders().get("ocelot") == null) {
+            List<String> list = new ArrayList<String>();
+            getLeaders().set("ocelot", list);
+            getLeaders().set("golem", list);
+            getLeaders().set("irongolem", list);
+            saveLeaders();
+        }
+
         debug = getConfig().getBoolean("plugin.debug", false);
         economy = getConfig().getBoolean("plugin.economy", false);
         contract = getConfig().getBoolean("plugin.contracts", false);
         report = getConfig().getBoolean("plugin.report", true);
         worlds = getConfig().getStringList("plugin.exclude_worlds");
+
         saveConfig();
     }
 
@@ -144,20 +163,20 @@ public class DeathCounter extends JavaPlugin {
     }
     
     public void log(String message) {
-        message = "[" + this + "] " + message;
-        LOGGER.info(message);
+        getLogger().info(message);
     }
     
     public void debug(boolean val) {
         getConfig().set("plugin.debug", val);
         debug = val;
+        log("Debug mode: " + (debug ? "enabled" : "disabled"));
         saveConfig();
     }
     
     public void debug(String message) {
         if (debug) {
-            message = "[" + this + "] [Debug] " + message;
-            LOGGER.info(message);
+            message = "[Debug] " + message;
+            getLogger().info(message);
         }
     }
 
@@ -165,7 +184,11 @@ public class DeathCounter extends JavaPlugin {
         if (report) {
             String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + "You killed a " + m.getFancyName();
             if (getBank() != null) {
-                message = message + " worth " + getBank().getFormattedAmount(p, amt, -1);
+                try {
+                    message = message + " worth " + getBank().getFormattedAmount(p, amt, -1);
+                } catch (Exception e) {
+                    debug("An error occurred while attempting to fetch the currency format string: " + e.getLocalizedMessage());
+                }
             }
             p.sendMessage(message + ".");
         }
@@ -272,10 +295,17 @@ public class DeathCounter extends JavaPlugin {
     public Manager getManager() {
         return manager;
     }
-    
+
+    public FileConfiguration getConfig() {
+        if (configuration == null) {
+            configuration = YamlConfiguration.loadConfiguration(configFile);
+        }
+        return configuration;
+    }
+
     protected FileConfiguration getLeaders() {
         if (leaderboards == null) {
-            leaderboards = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "leaders.yml"));
+            leaderboards = YamlConfiguration.loadConfiguration(leaderFile);
         }
         return leaderboards;
     }

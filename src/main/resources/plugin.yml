@@ -1,6 +1,6 @@
 name: DeathCounter
 main: net.krinsoft.deathcounter.DeathCounter
-version: ${project.version}
+version: ${project.version}-b${project.build.number}
 author: krinsdeath
 load: startup
 

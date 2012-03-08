@@ -1,33 +1,8 @@
 package net.krinsoft.deathcounter;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Blaze;
-import org.bukkit.entity.CaveSpider;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cow;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Enderman;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.Giant;
-import org.bukkit.entity.MagmaCube;
-import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Pig;
-import org.bukkit.entity.PigZombie;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Silverfish;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Snowman;
-import org.bukkit.entity.Spider;
-import org.bukkit.entity.Squid;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.*;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +33,12 @@ public enum Monster {
     MUSHROOM_COW("mushroomcow", "Mushroom Cow", "others"),
     SNOWMAN("snowman", "Snowman", "others"),
     VILLAGER("villager", "Villager", "others"),
-    PLAYER("player", "Player", "players");
+    PLAYER("player", "Player", "players"),
+    // 1.2 creatures
+    GOLEM("golem", "Golem", "monsters"),
+    IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
+    OCELOT("ocelot", "Ocelot", "monsters"),
+    ;
 
     private final String dbname;
     private final String name;
@@ -138,6 +118,12 @@ public enum Monster {
         if (e instanceof Snowman) { return SNOWMAN; }
         if (e instanceof Villager) { return VILLAGER; }
         if (e instanceof Player) { return PLAYER; }
+        // 1.2 creatures
+        if (e instanceof Golem) {
+            if (e instanceof IronGolem) { return IRON_GOLEM; }
+            return GOLEM;
+        }
+        if (e instanceof Ocelot) { return OCELOT; }
         return null;
     }
 }
