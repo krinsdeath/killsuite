@@ -3,10 +3,7 @@ package net.krinsoft.deathcounter;
 import com.fernferret.allpay.AllPay;
 import com.fernferret.allpay.GenericBank;
 import com.pneumaticraft.commandhandler.CommandHandler;
-import net.krinsoft.deathcounter.commands.DebugCommand;
-import net.krinsoft.deathcounter.commands.LeaderCommand;
-import net.krinsoft.deathcounter.commands.PermissionsHandler;
-import net.krinsoft.deathcounter.commands.StatsCommand;
+import net.krinsoft.deathcounter.commands.*;
 import net.krinsoft.deathcounter.listeners.EntityListener;
 import net.krinsoft.deathcounter.listeners.PlayerListener;
 import net.krinsoft.deathcounter.listeners.ServerListener;
@@ -100,6 +97,7 @@ public class DeathCounter extends JavaPlugin {
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
         tracker.save();
+        manager.disable();
         tracker = null;
         manager = null;
         bank = null;
@@ -117,7 +115,19 @@ public class DeathCounter extends JavaPlugin {
         return commandHandler.locateAndRunCommand(sender, arguments);
     }
 
-    public void registerConfig() {
+    /**
+     * Forces a reload of DeathCounter's configuration file
+     * @param val true will reload the files; false does nothing
+     */
+    public void registerConfig(boolean val) {
+        if (val) {
+            configFile = null;
+            configuration = null;
+            registerConfig();
+        }
+    }
+
+    protected void registerConfig() {
         configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
@@ -126,6 +136,12 @@ public class DeathCounter extends JavaPlugin {
         }
         if (getConfig().get("economy.monsters.ocelot") == null) {
             List<Double> list = new ArrayList<Double>();
+            list.add(3.0);
+            list.add(5.0);
+            getConfig().set("economy.monsters.ocelot", list);
+            getConfig().set("economy.monsters.golem", list);
+            getConfig().set("economy.monsters.irongolem", list);
+            saveConfig();
         }
 
         leaderFile = new File(getDataFolder(), "leaders.yml");
@@ -148,15 +164,15 @@ public class DeathCounter extends JavaPlugin {
         report = getConfig().getBoolean("plugin.report", true);
         worlds = getConfig().getStringList("plugin.exclude_worlds");
 
-        saveConfig();
     }
 
     private void registerCommands() {
         PermissionsHandler permissionsHandler = new PermissionsHandler();
         commandHandler = new CommandHandler(this, permissionsHandler);
-        commandHandler.registerCommand(new StatsCommand(this));
-        commandHandler.registerCommand(new LeaderCommand(this));
         commandHandler.registerCommand(new DebugCommand(this));
+        commandHandler.registerCommand(new LeaderCommand(this));
+        commandHandler.registerCommand(new ReloadCommand(this));
+        commandHandler.registerCommand(new StatsCommand(this));
         if (contract) {
             //commandHandler.registerCommand(new ContractCommand(this));
         }
@@ -169,7 +185,6 @@ public class DeathCounter extends JavaPlugin {
     public void debug(boolean val) {
         getConfig().set("plugin.debug", val);
         debug = val;
-        log("Debug mode: " + (debug ? "enabled" : "disabled"));
         saveConfig();
     }
     

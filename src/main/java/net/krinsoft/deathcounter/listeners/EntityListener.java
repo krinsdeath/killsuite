@@ -29,7 +29,6 @@ public class EntityListener implements Listener {
     void entityDeath(EntityDeathEvent event) {
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
-
         if (!(event.getEntity() instanceof LivingEntity)) { return; }
         // see if the event was an entity killing another entity
         if (event.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent) {

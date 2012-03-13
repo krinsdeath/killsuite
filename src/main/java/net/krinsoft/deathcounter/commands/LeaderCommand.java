@@ -14,7 +14,7 @@ public class LeaderCommand extends DeathCommand {
     
     public LeaderCommand(DeathCounter plugin) {
         super(plugin);
-        this.setName("DeathCounter Leaderboards");
+        this.setName("DeathCounter: Leaders");
         this.setCommandUsage("/dc leaders [monster]");
         this.addCommandExample("/dc leaders skeleton -- Show the top 5 killers for 'skeletons'");
         this.addCommandExample("/leaders player -- Show the top 5 player killers");

@@ -29,6 +29,7 @@ public class Tracker {
     }
     
     public void save() {
+        plugin.log("Saving database...");
         this.db.save();
     }
     

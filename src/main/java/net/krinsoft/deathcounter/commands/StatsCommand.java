@@ -2,6 +2,7 @@ package net.krinsoft.deathcounter.commands;
 
 import net.krinsoft.deathcounter.DeathCounter;
 import net.krinsoft.deathcounter.FancyMessage;
+import net.krinsoft.deathcounter.Killer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
@@ -15,7 +16,7 @@ public class StatsCommand extends DeathCommand {
     
     public StatsCommand(DeathCounter plugin) {
         super(plugin);
-        this.setName("DeathCounter Stats");
+        this.setName("DeathCounter: Stats");
         this.setCommandUsage("/dc stats [target] [-aop]");
         this.addCommandExample("/dc stats -- Display your own kill statistics.");
         this.addCommandExample("/dc stats [target] -a -- Show your (or a target's) 'animal' kills");
@@ -30,34 +31,39 @@ public class StatsCommand extends DeathCommand {
 
     @Override
     public void runCommand(CommandSender sender, List<String> args) {
-        CommandSender target = sender;
+        Killer target = plugin.getManager().getKiller(sender.getName());
         String category = "monsters";
         if (args.size() > 0) {
+            String player = ((args.size() >= 1) ? args.get(0) : sender.getName());
             String flag = ((args.size() == 2) ? args.get(1) : args.get(0));
             if (flag.startsWith("-")) {
-                if (flag.contains("m")) {
+                if (flag.startsWith("-m")) {
                     category = "monsters";
-                } else if (flag.contains("a")) {
+                } else if (flag.startsWith("-a")) {
                     category = "animals";
-                } else if (flag.contains("o")) {
+                } else if (flag.startsWith("-o")) {
                     category = "others";
-                } else if (flag.contains("p")) {
+                } else if (flag.startsWith("-p")) {
                     category = "players";
                 } else {
-                    sender.sendMessage(ChatColor.RED + "Unknown flag.");
-                }
-            } else {
-                target = plugin.getServer().getPlayer(flag);
-                if (target == null) {
-                    target = sender;
-                    sender.sendMessage(ChatColor.RED + "That target did not exist.");
+                    message(sender, ChatColor.RED + "Unknown flag.");
                 }
             }
+            target = plugin.getManager().getKiller(player);
         }
-        if (!target.equals(sender) && !sender.hasPermission("deathcounter.stats.other")) {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to view other peoples' stats.");
+        if (target == null) {
+            message(sender, ChatColor.RED + "That target did not exist.");
             return;
         }
+        if (!target.getName().equals(sender.getName()) && !sender.hasPermission("deathcounter.stats.other")) {
+            message(sender, ChatColor.RED + "You do not have permission to view other peoples' stats.");
+            return;
+        }
+        if (target.getName().equalsIgnoreCase("console")) {
+            message(sender, "The console cannot have recorded stats.");
+            return;
+        }
+        plugin.debug("Using category '" + category + "' for player '" + target.getName() + "'");
         FancyMessage message = new FancyMessage(plugin.getTracker().fetch(target.getName()), category);
         sender.sendMessage(message.getHeader());
         for (String line : message.getLines()) {

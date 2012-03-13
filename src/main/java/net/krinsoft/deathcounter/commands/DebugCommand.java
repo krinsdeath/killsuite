@@ -14,7 +14,7 @@ public class DebugCommand extends DeathCommand {
     
     public DebugCommand(DeathCounter plugin) {
         super(plugin);
-        this.setName("DeathCounter debug");
+        this.setName("DeathCounter: Debug");
         this.setCommandUsage("/dc debug [true|false|on|off]");
         this.setArgRange(0, 1);
         this.addKey("deathcounter debug");
@@ -31,14 +31,9 @@ public class DebugCommand extends DeathCommand {
                 val = Boolean.parseBoolean(t);
             } catch (NumberFormatException e) {
                 sender.sendMessage(ChatColor.RED + "Invalid option.");
-                plugin.debug("Invalid option specified.");
             }
         }
-        if (val) {
-            sender.sendMessage(ChatColor.GREEN + "Debug mode enabled.");
-        } else {
-            sender.sendMessage(ChatColor.RED + "Debug mode disabled.");
-        }
+        message(sender, "Debug mode: " + (val ? ChatColor.GREEN + "enabled" : ChatColor.RED + "disabled"));
         plugin.debug(val);
     }
 }

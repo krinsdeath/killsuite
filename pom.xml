@@ -6,12 +6,12 @@
 
     <groupId>net.krinsoft</groupId>
     <artifactId>deathcounter</artifactId>
-    <version>3.2.1</version>
+    <version>3.2.2</version>
     <name>DeathCounter</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.number>100</project.build.number>
+        <project.build.number>106</project.build.number>
     </properties>
 
     <repositories>

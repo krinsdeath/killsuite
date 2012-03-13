@@ -3,6 +3,7 @@ package net.krinsoft.deathcounter;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -18,6 +19,13 @@ public class Manager {
             killers.put(p.getName(), plugin.getTracker().fetch(p.getName()));
         }
     }
+
+    public void disable() {
+        plugin.log("Unregistering users...");
+        for (Killer killer : new HashSet<Killer>(killers.values())) {
+            killers.remove(killer.getName());
+        }
+    }
     
     public void register(Killer player) {
         killers.put(player.getName(), player);
@@ -27,7 +35,7 @@ public class Manager {
     public void register(String player) {
         killers.put(player, plugin.getTracker().fetch(player));
     }
-    
+
     public void unregister(String player) {
         killers.remove(player);
         plugin.debug(player + " was unregistered.");

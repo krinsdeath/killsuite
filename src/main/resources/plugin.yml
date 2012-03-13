@@ -8,8 +8,7 @@ commands:
   deathcounter:
     description: Main command for DeathCounter
     usage: /<command> [options]...
-    aliases:
-    - dc
+    aliases: [dc]
   stats:
     description: Show the statistics for the command sender or his specified target
     usage: /<command> [target] [-aomp]

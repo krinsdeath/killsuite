@@ -2,6 +2,7 @@ package net.krinsoft.deathcounter.commands;
 
 import com.pneumaticraft.commandhandler.PermissionsInterface;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 
 import java.util.List;
 
@@ -12,13 +13,7 @@ public class PermissionsHandler implements PermissionsInterface {
 
     @Override
     public boolean hasPermission(CommandSender sender, String node, boolean isOpRequired) {
-        boolean has = sender.hasPermission(node);
-        boolean is = sender.isPermissionSet(node);
-        boolean all = sender.hasPermission("deathcounter.*");
-        if (has) { return true; }
-        else if (is && !has) { return false; }
-        else if (all) { return true; }
-        return false;
+        return sender instanceof ConsoleCommandSender || sender.hasPermission(node);
     }
 
     @Override
