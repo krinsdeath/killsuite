@@ -6,12 +6,12 @@
 
     <groupId>net.krinsoft</groupId>
     <artifactId>deathcounter</artifactId>
-    <version>3.2.2</version>
+    <version>3.2.3</version>
     <name>DeathCounter</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.number>106</project.build.number>
+        <project.build.number>112</project.build.number>
     </properties>
 
     <repositories>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.3-R0.2-SNAPSHOT</version>
+            <version>1.2.4-R1.0-SNAPSHOT</version>
         </dependency>
         <!-- End Bukkit -->
         <!-- CommandHandler -->
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.fernferret.allpay</groupId>
             <artifactId>AllPay</artifactId>
-            <version>8</version>
+            <version>10</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

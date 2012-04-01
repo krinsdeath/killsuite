@@ -17,11 +17,11 @@ public class StatsCommand extends DeathCommand {
     public StatsCommand(DeathCounter plugin) {
         super(plugin);
         this.setName("DeathCounter: Stats");
-        this.setCommandUsage("/dc stats [target] [-aop]");
+        this.setCommandUsage("/dc stats [-aopm] [target]");
         this.addCommandExample("/dc stats -- Display your own kill statistics.");
-        this.addCommandExample("/dc stats [target] -a -- Show your (or a target's) 'animal' kills");
-        this.addCommandExample("/dc stats [target] -o -- Show your (or a target's) 'other' kills");
-        this.addCommandExample("/dc stats [target] -p -- Show your (or a target's) 'player' kills");
+        this.addCommandExample("/dc stats -a [target] -- Show your (or a target's) 'animal' kills");
+        this.addCommandExample("/dc stats -o [target] -- Show your (or a target's) 'other' kills");
+        this.addCommandExample("/dc stats -p [target] -- Show your (or a target's) 'player' kills");
         this.setArgRange(0, 2);
         this.addKey("deathcounter stats");
         this.addKey("dc stats");
@@ -34,8 +34,8 @@ public class StatsCommand extends DeathCommand {
         Killer target = plugin.getManager().getKiller(sender.getName());
         String category = "monsters";
         if (args.size() > 0) {
-            String player = ((args.size() >= 1) ? args.get(0) : sender.getName());
-            String flag = ((args.size() == 2) ? args.get(1) : args.get(0));
+            String flag = args.get(0);
+            String player = ((args.size() == 2) ? args.get(1) : sender.getName());
             if (flag.startsWith("-")) {
                 if (flag.startsWith("-m")) {
                     category = "monsters";

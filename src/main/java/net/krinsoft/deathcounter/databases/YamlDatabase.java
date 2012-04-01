@@ -31,7 +31,6 @@ public class YamlDatabase implements Database {
         for (Monster m : Monster.values()) {
             users.set(player.getName() + "." + m.getName(), player.get(m.getName()));
         }
-        save();
     }
 
     @Override
@@ -46,7 +45,7 @@ public class YamlDatabase implements Database {
         for (Monster m : Monster.values()) {
             kills.put(m.getName(), users.getInt(m.getName(), 0));
         }
-        return new Killer(users.getInt("id"), player, kills);
+        return new Killer(plugin, users.getInt("id"), player, kills);
     }
     
     @Override

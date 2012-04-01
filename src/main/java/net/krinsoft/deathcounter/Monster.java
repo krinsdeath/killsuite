@@ -34,7 +34,6 @@ public enum Monster {
     SNOWMAN("snowman", "Snowman", "others"),
     VILLAGER("villager", "Villager", "others"),
     PLAYER("player", "Player", "players"),
-    // 1.2 creatures
     GOLEM("golem", "Golem", "monsters"),
     IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
     OCELOT("ocelot", "Ocelot", "monsters"),

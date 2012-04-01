@@ -7,11 +7,13 @@ import java.util.Map;
  * @author krinsdeath
  */
 public class Killer {
+    private DeathCounter plugin;
     private int ID;
     private String name;
     private Map<String, Integer> kills = new HashMap<String, Integer>();
 
-    public Killer(int id, String name, Map<String, Integer> kills) {
+    public Killer(DeathCounter inst, int id, String name, Map<String, Integer> kills) {
+        this.plugin = inst;
         this.ID = id;
         this.name = name;
         this.kills.clear();
@@ -31,7 +33,7 @@ public class Killer {
     public int update(String field) {
         Monster m = Monster.getType(field);
         if (m == null) { return -1; }
-        DeathCounter.instance.debug("Incrementing " + m.getFancyName() + " from " + kills.get(m.getName()) + " to " + (kills.get(m.getName()) + 1));
+        plugin.debug("Incrementing " + m.getFancyName() + " from " + kills.get(m.getName()) + " to " + (kills.get(m.getName()) + 1));
         kills.put(m.getName(), (kills.get(m.getName()) + 1));
         return kills.get(m.getName());
     }
