@@ -28,8 +28,6 @@ import java.util.List;
  * @author krinsdeath
  */
 public class DeathCounter extends JavaPlugin {
-    // public static instance handle
-    protected static DeathCounter instance;
     private boolean debug = false;
     private boolean economy = false;
     private boolean contract = false;
@@ -52,7 +50,6 @@ public class DeathCounter extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        instance = this;
         registerConfig();
 
         if (economy) {
