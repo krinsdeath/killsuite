@@ -22,14 +22,14 @@ public class Manager {
     
     public Manager(KillSuite plugin) {
         this.plugin = plugin;
+        getDatabase();
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             register(p.getName());
         }
-        getDatabase();
     }
 
     public void disable() {
-        plugin.log("Unregistering users...");
+        plugin.debug("Unregistering users...");
         for (Killer killer : new HashSet<Killer>(killers.values())) {
             killers.remove(killer.getName());
         }

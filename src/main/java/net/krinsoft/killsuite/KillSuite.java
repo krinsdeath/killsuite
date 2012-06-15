@@ -47,10 +47,13 @@ public class KillSuite extends JavaPlugin {
     
     private Manager manager;
 
+    private EntityListener eListener;
+
     private boolean deathcounter;
 
     @Override
     public void onEnable() {
+        long startup = System.currentTimeMillis();
         registerConfig();
 
         if (!deathcounter) {
@@ -71,7 +74,7 @@ public class KillSuite extends JavaPlugin {
 
         if (economy) {
             if (validateAllPay()) {
-                log("Economy successfully hooked.");
+                debug("Economy successfully hooked.");
             }
         }
         
@@ -81,7 +84,7 @@ public class KillSuite extends JavaPlugin {
         registerCommands();
 
         // event listeners
-        EntityListener eListener = new EntityListener(this);
+        eListener = new EntityListener(this);
         PlayerListener pListener = new PlayerListener(this);
         ServerListener sListener = new ServerListener(this);
         WorldListener wListener = new WorldListener(this);
@@ -99,11 +102,12 @@ public class KillSuite extends JavaPlugin {
             }
         }, 300L, 300L * 20L);
         
-        log("Enabled successfully.");
+        log("Enabled successfully. (" + (System.currentTimeMillis() - startup) + "ms)");
     }
 
     @Override
     public void onDisable() {
+        eListener.save();
         saveLeaders();
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
@@ -267,7 +271,7 @@ public class KillSuite extends JavaPlugin {
                 for (String entry : leaders) {
                     eKiller = entry.split(":")[0];
                     eKills = Integer.parseInt(entry.split(":")[1]);
-                    s.sendMessage(ChatColor.GOLD + "" + place + ") " + ChatColor.GREEN + eKiller + ChatColor.WHITE + " - " + ChatColor.AQUA + eKills);
+                    s.sendMessage(ChatColor.GOLD + "#" + place + " - " + ChatColor.GREEN + eKiller + ChatColor.WHITE + " - " + ChatColor.AQUA + eKills);
                     place++;
                 }
             }
@@ -282,30 +286,35 @@ public class KillSuite extends JavaPlugin {
     
     private void updateLeaderboards(Player p, Monster m) {
         try {
-            int eKills;
-            int kills = manager.getKiller(p.getName()).get(m.getName());
-            List<String> leaders = getLeaders().getStringList(m.getName());
+            int kills = manager.getKiller(p.getName()).get(m.getName()); // the provided player's kill count
+            List<String> leaders = getLeaders().getStringList(m.getName()); // the provided monster's current leaderboard
+            // if the leaderboard is empty, this player is guaranteed to have the highest kill count
             if (leaders.isEmpty()) {
                 debug("Leader list was empty for " + m.getName());
                 leaders.add(0, p.getName() + ":" + kills);
             }
+            // iterate through the list of leader:kills
             for (int i = -1; i < leaders.size(); i++) {
+                // will never be true if at least one player exists in the leader list
                 if (i+1 > leaders.size() && i+1 <= 4) {
                     debug("Adding '" + p.getName() + ":" + kills +"' to list");
                     leaders.add(i+1, p.getName() + ":" + kills);
                     break;
                 }
+                // check if this player's name exists in the list already and update it if it does
                 String[] a = leaders.get(i+1).split(":");
                 if (a[0].equals(p.getName())) {
                     leaders.set(i+1, p.getName() + ":" + kills);
                     break;
                 }
-                eKills = Integer.parseInt(a[1]);
+                // check if this player's kills are higher than the loop's current kills
+                int eKills = Integer.parseInt(a[1]);
                 if (kills > eKills) {
                     leaders.add(i+1, p.getName() + ":" + kills);
                     break;
                 }
             }
+            // set the updated list
             getLeaders().set(m.getName(), leaders.subList(0, (leaders.size() > 4 ? 4 : leaders.size())));
         } catch (NullPointerException e) {
             debug("Something went wrong.");
@@ -320,11 +329,10 @@ public class KillSuite extends JavaPlugin {
         if (bank != null) { return true; }
         double allpayVersion = 3.1;
         AllPay allpay = new AllPay(this, "[" + this + "] ");
-        log("Validating AllPay at v" + allpayVersion + "...");
         if (allpay.getVersion() >= allpayVersion) {
             bank = allpay.loadEconPlugin();
             bank.toggleReceipts(false);
-            log("Found economy plugin: " + bank.getEconUsed() + "... hooking...");
+            debug("Hooked economy with AllPay v" + allpay.getVersion() + "...");
             return true;
         }
         return false;
@@ -334,7 +342,7 @@ public class KillSuite extends JavaPlugin {
         if (!val) {
             economy = false;
             bank = null;
-            log("Economy plugin unhooked.");
+            debug("Economy plugin unhooked.");
             return;
         }
         validateAllPay();

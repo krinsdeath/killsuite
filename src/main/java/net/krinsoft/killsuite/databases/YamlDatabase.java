@@ -59,7 +59,7 @@ public class YamlDatabase implements Database {
     }
     
     private void makeNode(String player) {
-        plugin.log("New player: " + player + "! Creating default entry...");
+        plugin.debug("New player: " + player + "! Creating default entry...");
         for (Monster m : Monster.values()) {
             users.set(player + "." + m.getName(), 0);
         }

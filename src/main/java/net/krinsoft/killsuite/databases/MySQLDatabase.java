@@ -78,7 +78,7 @@ public class MySQLDatabase implements Database {
         try {
             Connection conn = getConnection();
             Statement state = conn.createStatement();
-            String query = "SELECT * FROM `killers` WHERE `name`='" + player + "';";
+            String query = "SELECT * FROM killers WHERE name='" + player + "';";
             ResultSet result = state.executeQuery(query);
             Map<String, Integer> kills = new HashMap<String, Integer>();
             if (result.next()) {
@@ -109,12 +109,12 @@ public class MySQLDatabase implements Database {
             String mons = "";
             String vals = "";
             for (Monster m : Monster.values()) {
-                mons += "`" + m.getName() + "`, ";
+                mons += m.getName() + ", ";
                 vals += "?, ";
             }
             mons = mons.substring(0, mons.length() - 2);
             vals = vals.substring(0, vals.length() - 2);
-            String query = "REPLACE INTO `killers` (`name`, " + mons + ") VALUES(?, " + vals + ");";
+            String query = "REPLACE INTO killers (name, " + mons + ") VALUES(?, " + vals + ");";
             PreparedStatement state = conn.prepareStatement(query);
             for (Killer k : plugin.getManager().getKillers()) {
                 if (k == null || k.total() == 0) {
@@ -161,7 +161,7 @@ public class MySQLDatabase implements Database {
                 plugin.debug(e.getLocalizedMessage());
             }
         }
-        plugin.log("... done!");
+        plugin.debug("... done!");
         query = "SELECT AUTO_INCREMENT AS total FROM information_schema.tables WHERE table_name = 'killers';";
         ResultSet res = state.executeQuery(query);
         if (res.next()) {

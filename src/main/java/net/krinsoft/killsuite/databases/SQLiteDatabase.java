@@ -134,11 +134,11 @@ public class SQLiteDatabase implements Database {
                 "name VARCHAR(32) UNIQUE, " +
                 mons +
                 ");";
-        plugin.log("Building database...");
+        plugin.debug("Building database...");
         state.execute(query);
-        plugin.log("Updating database to latest schema...");
+        plugin.debug("Updating database to latest schema...");
         for (Monster m : Monster.values()) {
-            query = "ALTER TABLE `killers` ADD `" + m.getName() + "` INTEGER;";
+            query = "ALTER TABLE killers ADD " + m.getName() + " INTEGER;";
             try {
                 state.execute(query);
             } catch (SQLException e) {
@@ -149,7 +149,7 @@ public class SQLiteDatabase implements Database {
         query = "SELECT ROWID AS total FROM killers ;";
         ResultSet res = state.executeQuery(query);
         if (res.next()) {
-            plugin.log("Total entries: " + res.getInt("total"));
+            plugin.log("Total DB entries: " + res.getInt("total"));
         }
     }
 

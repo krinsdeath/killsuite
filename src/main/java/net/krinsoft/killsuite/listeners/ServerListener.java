@@ -25,7 +25,7 @@ public class ServerListener implements Listener {
     public void pluginEnable(PluginEnableEvent event) {
         if (Arrays.asList(AllPay.getValidEconPlugins()).contains(event.getPlugin().getDescription().getName())) {
             if (this.plugin.validateAllPay()) {
-                this.plugin.log("Economy plugin successfully hooked.");
+                this.plugin.debug("Economy plugin successfully hooked.");
             }
         }
     }

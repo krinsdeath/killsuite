@@ -40,7 +40,7 @@ public class Killer {
 
     public long total() {
         long total = 0;
-        for (Integer kills : kills.values()) {
+        for (Integer kills : this.kills.values()) {
             total += kills;
         }
         return total;

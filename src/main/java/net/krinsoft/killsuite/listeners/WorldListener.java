@@ -20,7 +20,7 @@ public class WorldListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void worldLoad(WorldLoadEvent event) {
         if (plugin.validWorld(event.getWorld().getName())) {
-            plugin.log("Tracking kills in '" + event.getWorld().getName() + "'");
+            plugin.debug("Tracking kills in '" + event.getWorld().getName() + "'");
         }
     }
     

@@ -12,19 +12,24 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import java.io.*;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author krinsdeath
  */
 @SuppressWarnings("unused")
 public class EntityListener implements Listener {
-    private Map<UUID, CreatureSpawnEvent.SpawnReason> reasons = new HashMap<UUID, CreatureSpawnEvent.SpawnReason>();
+    private Set<UUID> reasons = new HashSet<UUID>();
     private KillSuite plugin;
     
     public EntityListener(KillSuite plugin) {
         this.plugin = plugin;
+        load();
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -32,28 +37,38 @@ public class EntityListener implements Listener {
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
         if (!(event.getEntity() instanceof LivingEntity)) { return; }
+        // remove the entity from the UUID map
         // see if the event was an entity killing another entity
         if (event.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent) {
             // cast to entity damage by entity to check the cause of the damage
             EntityDamageByEntityEvent evt = (EntityDamageByEntityEvent) event.getEntity().getLastDamageCause();
             Player killer;
             if (evt.getDamager() instanceof Player) {
+                // damager was a player
                 killer = (Player) evt.getDamager();
             } else if (evt.getDamager() instanceof Projectile) {
+                // damager was a projectile
                 if (((Projectile)evt.getDamager()).getShooter() instanceof Player) {
+                    // shooter was a player
                     killer = (Player) ((Projectile)evt.getDamager()).getShooter();
                 } else {
+                    // shooter was a monster
+                    reasons.remove(event.getEntity().getUniqueId());
                     return;
                 }
             } else {
+                reasons.remove(event.getEntity().getUniqueId());
                 return;
             }
             double mod = 1;
-            CreatureSpawnEvent.SpawnReason reason = reasons.get(event.getEntity().getUniqueId());
-            if (reason != null && reason == CreatureSpawnEvent.SpawnReason.SPAWNER) {
+            if (reasons.contains(event.getEntity().getUniqueId())) {
+                // check if the admin wants to pay users for spawner mobs
                 if (plugin.getConfig().getBoolean("economy.spawner.payout", true)) {
+                    // diminish the payout
                     mod = plugin.getConfig().getDouble("economy.spawner.diminish", 0.50);
                 } else {
+                    // cancel the tracking / reward
+                    reasons.remove(event.getEntity().getUniqueId());
                     return;
                 }
             }
@@ -61,6 +76,8 @@ public class EntityListener implements Listener {
             plugin.getManager().getKiller(killer.getName()).update(monster.getName());
             double amount = 0;
             if (plugin.getBank() != null) {
+                // economy is enabled
+                // multivariable calculus ensues ->
                 try {
                     if (!monster.getCategory().equalsIgnoreCase("players")) {
                         List<Double> range = plugin.getConfig().getDoubleList("economy." + monster.getCategory() + "." + monster.getName());
@@ -94,19 +111,58 @@ public class EntityListener implements Listener {
                     plugin.debug(e.getLocalizedMessage() + ": Invalid list at 'economy." + monster.getCategory() + "." + monster.getName() + "'");
                 }
             }
+            // report the earnings
             plugin.report(killer, monster, amount);
         }
+        reasons.remove(event.getEntity().getUniqueId());
     }
 
     @EventHandler
     void creatureSpawn(CreatureSpawnEvent event) {
-        UUID id = event.getEntity().getUniqueId();
-        CreatureSpawnEvent.SpawnReason reason = reasons.get(id);
-        if (reason == null) {
-            reasons.put(id, event.getSpawnReason());
+        if (!plugin.validWorld(event.getEntity().getWorld().getName())) {
             return;
         }
-        plugin.debug("Duplicate monster ID; ignoring update to the map!");
+        UUID id = event.getEntity().getUniqueId();
+        if (!reasons.contains(id)) {
+            reasons.add(id);
+        }
+    }
+
+    public void save() {
+        try {
+            File idFile = new File(plugin.getDataFolder(), "uuid_spawner.dat");
+            if (!idFile.exists()) {
+                idFile.createNewFile();
+            }
+            FileOutputStream fileOut = new FileOutputStream(idFile);
+            ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
+            objOut.writeObject(reasons);
+            objOut.close();
+        } catch (FileNotFoundException e) {
+            plugin.getLogger().warning(e.getMessage());
+        } catch (IOException e) {
+            plugin.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void load() {
+        try {
+            File idFile = new File(plugin.getDataFolder(), "uuid_spawner.dat");
+            if (idFile.exists()) {
+                FileInputStream fileIn = new FileInputStream(idFile);
+                ObjectInputStream objIn = new ObjectInputStream(fileIn);
+                reasons = (Set<UUID>) objIn.readObject();
+                objIn.close();
+                fileIn.close();
+                idFile.delete();
+            }
+        } catch (FileNotFoundException e) {
+            plugin.getLogger().warning(e.getMessage());
+        } catch (IOException e) {
+            plugin.getLogger().warning(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            plugin.getLogger().warning(e.getMessage());
+        }
     }
 
 }
