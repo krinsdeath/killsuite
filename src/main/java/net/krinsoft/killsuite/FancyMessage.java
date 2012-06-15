@@ -1,4 +1,4 @@
-package net.krinsoft.deathcounter;
+package net.krinsoft.killsuite;
 
 import org.bukkit.ChatColor;
 

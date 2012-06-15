@@ -1,6 +1,6 @@
-package net.krinsoft.deathcounter.databases;
+package net.krinsoft.killsuite.databases;
 
-import net.krinsoft.deathcounter.Killer;
+import net.krinsoft.killsuite.Killer;
 
 /**
  * @author krinsdeath

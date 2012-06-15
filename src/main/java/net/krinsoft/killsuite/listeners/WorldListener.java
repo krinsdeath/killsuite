@@ -1,6 +1,6 @@
-package net.krinsoft.deathcounter.listeners;
+package net.krinsoft.killsuite.listeners;
 
-import net.krinsoft.deathcounter.DeathCounter;
+import net.krinsoft.killsuite.KillSuite;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -11,9 +11,9 @@ import org.bukkit.event.world.WorldLoadEvent;
  */
 @SuppressWarnings("unused")
 public class WorldListener implements Listener {
-    private DeathCounter plugin;
+    private KillSuite plugin;
     
-    public WorldListener(DeathCounter plugin) {
+    public WorldListener(KillSuite plugin) {
         this.plugin = plugin;
     }
 

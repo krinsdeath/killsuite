@@ -1,7 +1,7 @@
-package net.krinsoft.deathcounter.listeners;
+package net.krinsoft.killsuite.listeners;
 
 import com.fernferret.allpay.AllPay;
-import net.krinsoft.deathcounter.DeathCounter;
+import net.krinsoft.killsuite.KillSuite;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,9 +15,9 @@ import java.util.Arrays;
  */
 @SuppressWarnings("unused")
 public class ServerListener implements Listener {
-    private DeathCounter plugin;
+    private KillSuite plugin;
     
-    public ServerListener(DeathCounter plugin) {
+    public ServerListener(KillSuite plugin) {
         this.plugin = plugin;
     }
 

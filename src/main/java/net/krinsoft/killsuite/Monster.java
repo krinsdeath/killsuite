@@ -1,4 +1,4 @@
-package net.krinsoft.deathcounter;
+package net.krinsoft.killsuite;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
@@ -34,9 +34,9 @@ public enum Monster {
     SNOWMAN("snowman", "Snowman", "others"),
     VILLAGER("villager", "Villager", "others"),
     PLAYER("player", "Player", "players"),
-    GOLEM("golem", "Golem", "monsters"),
     IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
-    OCELOT("ocelot", "Ocelot", "monsters"),
+    //SNOW_GOLEM("snowgolem", "Snow Golem", "monsters"),
+    OCELOT("ocelot", "Ocelot", "animals"),
     ;
 
     private final String dbname;
@@ -120,7 +120,8 @@ public enum Monster {
         // 1.2 creatures
         if (e instanceof Golem) {
             if (e instanceof IronGolem) { return IRON_GOLEM; }
-            return GOLEM;
+            //if (e instanceof SnowGolem) { return SNOW_GOLEM; }
+            //return GOLEM;
         }
         if (e instanceof Ocelot) { return OCELOT; }
         return null;

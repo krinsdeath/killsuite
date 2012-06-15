@@ -1,8 +1,8 @@
-package net.krinsoft.deathcounter.databases;
+package net.krinsoft.killsuite.databases;
 
-import net.krinsoft.deathcounter.DeathCounter;
-import net.krinsoft.deathcounter.Killer;
-import net.krinsoft.deathcounter.Monster;
+import net.krinsoft.killsuite.KillSuite;
+import net.krinsoft.killsuite.Killer;
+import net.krinsoft.killsuite.Monster;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,10 +16,10 @@ import java.util.Map;
  * @author krinsdeath
  */
 public class YamlDatabase implements Database {
-    private DeathCounter plugin;
+    private KillSuite plugin;
     private FileConfiguration users;
     
-    public YamlDatabase(DeathCounter plugin) {
+    public YamlDatabase(KillSuite plugin) {
         this.plugin = plugin;
         File file = new File(plugin.getDataFolder(), "users.yml"); 
         this.users = YamlConfiguration.loadConfiguration(file);
@@ -35,7 +35,7 @@ public class YamlDatabase implements Database {
 
     @Override
     public Killer fetch(String player) {
-        plugin.debug("Loading player '" + player + "'");
+        plugin.debug("Loading player '" + player + "'...");
         Map<String, Integer> kills = new HashMap<String, Integer>();
         ConfigurationSection users = this.users.getConfigurationSection(player);
         if (users == null) {
@@ -45,7 +45,7 @@ public class YamlDatabase implements Database {
         for (Monster m : Monster.values()) {
             kills.put(m.getName(), users.getInt(m.getName(), 0));
         }
-        return new Killer(plugin, users.getInt("id"), player, kills);
+        return new Killer(plugin, player, kills);
     }
     
     @Override
@@ -59,11 +59,7 @@ public class YamlDatabase implements Database {
     }
     
     private void makeNode(String player) {
-        plugin.log("Creating new profile for player '" + player + "'!");
-        int ID = this.users.getInt("profiles", -1);
-        ID++;
-        users.set("profiles", ID);
-        users.set(player + ".id", ID);
+        plugin.log("New player: " + player + "! Creating default entry...");
         for (Monster m : Monster.values()) {
             users.set(player + "." + m.getName(), 0);
         }

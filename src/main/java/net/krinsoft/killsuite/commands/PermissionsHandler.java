@@ -1,4 +1,4 @@
-package net.krinsoft.deathcounter.commands;
+package net.krinsoft.killsuite.commands;
 
 import com.pneumaticraft.commandhandler.PermissionsInterface;
 import org.bukkit.command.CommandSender;

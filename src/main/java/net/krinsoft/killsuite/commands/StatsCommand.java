@@ -1,8 +1,8 @@
-package net.krinsoft.deathcounter.commands;
+package net.krinsoft.killsuite.commands;
 
-import net.krinsoft.deathcounter.DeathCounter;
-import net.krinsoft.deathcounter.FancyMessage;
-import net.krinsoft.deathcounter.Killer;
+import net.krinsoft.killsuite.KillSuite;
+import net.krinsoft.killsuite.FancyMessage;
+import net.krinsoft.killsuite.Killer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
@@ -12,21 +12,21 @@ import java.util.List;
 /**
  * @author krinsdeath
  */
-public class StatsCommand extends DeathCommand {
+public class StatsCommand extends KillSuiteCommand {
     
-    public StatsCommand(DeathCounter plugin) {
+    public StatsCommand(KillSuite plugin) {
         super(plugin);
-        this.setName("DeathCounter: Stats");
-        this.setCommandUsage("/dc stats [-aopm] [target]");
-        this.addCommandExample("/dc stats -- Display your own kill statistics.");
-        this.addCommandExample("/dc stats -a [target] -- Show your (or a target's) 'animal' kills");
-        this.addCommandExample("/dc stats -o [target] -- Show your (or a target's) 'other' kills");
-        this.addCommandExample("/dc stats -p [target] -- Show your (or a target's) 'player' kills");
+        this.setName("KillSuite: Stats");
+        this.setCommandUsage("/ks stats [-aopm] [target]");
+        this.addCommandExample("/ks stats -- Display your own kill statistics.");
+        this.addCommandExample("/stats -a [target] -- Show your (or a target's) 'animal' kills");
+        this.addCommandExample("/killsuite stats -o [target] -- Show your (or a target's) 'other' kills");
+        this.addCommandExample("/ks stats -p [target] -- Show your (or a target's) 'player' kills");
         this.setArgRange(0, 2);
-        this.addKey("deathcounter stats");
-        this.addKey("dc stats");
+        this.addKey("killsuite stats");
+        this.addKey("ks stats");
         this.addKey("stats");
-        this.setPermission("deathcounter.stats", "Allows users to check their statistics.", PermissionDefault.TRUE);
+        this.setPermission("killsuite.stats", "Allows users to check their statistics.", PermissionDefault.TRUE);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class StatsCommand extends DeathCommand {
             message(sender, ChatColor.RED + "That target did not exist.");
             return;
         }
-        if (!target.getName().equals(sender.getName()) && !sender.hasPermission("deathcounter.stats.other")) {
+        if (!target.getName().equals(sender.getName()) && !sender.hasPermission("killsuite.stats.other")) {
             message(sender, ChatColor.RED + "You do not have permission to view other peoples' stats.");
             return;
         }
@@ -64,7 +64,7 @@ public class StatsCommand extends DeathCommand {
             return;
         }
         plugin.debug("Using category '" + category + "' for player '" + target.getName() + "'");
-        FancyMessage message = new FancyMessage(plugin.getTracker().fetch(target.getName()), category);
+        FancyMessage message = new FancyMessage(plugin.getManager().getKiller(target.getName()), category);
         sender.sendMessage(message.getHeader());
         for (String line : message.getLines()) {
             sender.sendMessage(line);

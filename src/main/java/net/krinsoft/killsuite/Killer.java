@@ -1,4 +1,4 @@
-package net.krinsoft.deathcounter;
+package net.krinsoft.killsuite;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,14 +7,14 @@ import java.util.Map;
  * @author krinsdeath
  */
 public class Killer {
-    private DeathCounter plugin;
+    private KillSuite plugin;
     private int ID;
     private String name;
     private Map<String, Integer> kills = new HashMap<String, Integer>();
 
-    public Killer(DeathCounter inst, int id, String name, Map<String, Integer> kills) {
+    public Killer(KillSuite inst, String name, Map<String, Integer> kills) {
         this.plugin = inst;
-        this.ID = id;
+        this.ID = name.hashCode();
         this.name = name;
         this.kills.clear();
         this.kills.putAll(kills);
@@ -36,6 +36,14 @@ public class Killer {
         plugin.debug("Incrementing " + m.getFancyName() + " from " + kills.get(m.getName()) + " to " + (kills.get(m.getName()) + 1));
         kills.put(m.getName(), (kills.get(m.getName()) + 1));
         return kills.get(m.getName());
+    }
+
+    public long total() {
+        long total = 0;
+        for (Integer kills : kills.values()) {
+            total += kills;
+        }
+        return total;
     }
 
     @Override

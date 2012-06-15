@@ -1,6 +1,6 @@
-package net.krinsoft.deathcounter.commands;
+package net.krinsoft.killsuite.commands;
 
-import net.krinsoft.deathcounter.DeathCounter;
+import net.krinsoft.killsuite.KillSuite;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
@@ -10,16 +10,16 @@ import java.util.List;
 /**
  * @author krinsdeath
  */
-public class DebugCommand extends DeathCommand {
+public class DebugCommand extends KillSuiteCommand {
     
-    public DebugCommand(DeathCounter plugin) {
+    public DebugCommand(KillSuite plugin) {
         super(plugin);
-        this.setName("DeathCounter: Debug");
-        this.setCommandUsage("/dc debug [true|false|on|off]");
+        this.setName("KillSuite: Debug");
+        this.setCommandUsage("/ks debug [true|false|on|off]");
         this.setArgRange(0, 1);
-        this.addKey("deathcounter debug");
-        this.addKey("dc debug");
-        this.setPermission("deathcounter.debug", "Allows users to toggle DeathCounter's debug mode", PermissionDefault.OP);
+        this.addKey("killsuite debug");
+        this.addKey("ks debug");
+        this.setPermission("killsuite.debug", "Allows users to toggle KillSuite's debug mode", PermissionDefault.OP);
     }
 
     @Override

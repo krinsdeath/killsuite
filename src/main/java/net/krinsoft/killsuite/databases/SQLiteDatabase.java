@@ -1,8 +1,8 @@
-package net.krinsoft.deathcounter.databases;
+package net.krinsoft.killsuite.databases;
 
-import net.krinsoft.deathcounter.DeathCounter;
-import net.krinsoft.deathcounter.Killer;
-import net.krinsoft.deathcounter.Monster;
+import net.krinsoft.killsuite.KillSuite;
+import net.krinsoft.killsuite.Killer;
+import net.krinsoft.killsuite.Monster;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
@@ -14,12 +14,12 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class SQLiteDatabase implements Database {
-    private DeathCounter plugin;
+    private KillSuite plugin;
     private String connectionURL;
 
-    public SQLiteDatabase(DeathCounter plugin) {
+    public SQLiteDatabase(KillSuite plugin) {
         this.plugin = plugin;
-        this.connectionURL = "jdbc:sqlite:plugins/DeathCounter/users.db";
+        this.connectionURL = "jdbc:sqlite:plugins/KillSuite/users.db";
         try {
             Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection(connectionURL);
@@ -46,10 +46,10 @@ public class SQLiteDatabase implements Database {
             Statement state = conn.createStatement();
             String mons = "";
             for (Monster m : Monster.values()) {
-                mons += "`" + m.getName() + "`=" + player.get(m.getName()) + ", ";
+                mons += m.getName() + "=" + player.get(m.getName()) + ", ";
             }
             mons = mons.substring(0, mons.length() - 2);
-            String query = "UPDATE `killers` SET " + mons + " WHERE `name`='" + player.getName() + "';";
+            String query = "UPDATE killers SET " + mons + " WHERE name='" + player.getName() + "';";
             state.execute(query);
             state.close();
             conn.close();
@@ -65,28 +65,21 @@ public class SQLiteDatabase implements Database {
         try {
             Connection conn = DriverManager.getConnection(connectionURL);
             Statement state = conn.createStatement();
-            String query = "SELECT * FROM `killers` WHERE `name`='" + player + "';";
+            String query = "SELECT * FROM killers WHERE name='" + player + "';";
             ResultSet result = state.executeQuery(query);
             Map<String, Integer> kills = new HashMap<String, Integer>();
-            int id = 1;
             if (result.next()) {
                 for (Monster m : Monster.values()) {
                     kills.put(m.getName(), result.getInt(m.getName()));
                 }
-                id = result.getInt("id");
-                plugin.debug("Loading player id '" + id + "'...");
+                plugin.debug("Loading player '" + player + "'...");
             } else {
-                query = "SELECT `id` FROM `killers` ORDER BY `id` ASC LIMIT 1";
-                result = state.executeQuery(query);
-                if (result.next()) {
-                    id = result.getInt("id")+1;
-                }
                 for (Monster m : Monster.values()) {
                     kills.put(m.getName(), 0);
                 }
-                plugin.debug("New player! Creating default entry with id '" + id + "'");
+                plugin.debug("New player: " + player + "! Creating default entry...");
             }
-            killer = new Killer(plugin, id, player, kills);
+            killer = new Killer(plugin, player, kills);
             state.close();
             conn.close();
         } catch (SQLException e) {
@@ -102,15 +95,14 @@ public class SQLiteDatabase implements Database {
             conn.setAutoCommit(false);
             String mons = "";
             for (Monster m : Monster.values()) {
-                mons += "`" + m.getName() + "`=?, ";
+                mons += m.getName() + "=?, ";
             }
             mons = mons.substring(0, mons.length() - 2);
-            String query = "UPDATE `killers` SET " + mons + " WHERE `name`=?";
+            String query = "UPDATE killers SET " + mons + " WHERE name=?";
             PreparedStatement state = conn.prepareStatement(query);
-            for (Player p : plugin.getServer().getOnlinePlayers()) {
-                Killer k = plugin.getManager().getKiller(p.getName());
-                if (k == null) {
-                    plugin.debug("Attempted to save a null player; aborting...");
+            for (Killer k : plugin.getManager().getKillers()) {
+                if (k == null || k.total() == 0) {
+                    plugin.debug("Attempted to save blank player; aborting...");
                     continue;
                 }
                 int i = 1;
@@ -136,9 +128,10 @@ public class SQLiteDatabase implements Database {
             mons += m.getName() + " INTEGER, ";
         }
         mons = mons.substring(0, mons.length() - 2);
-        String query = "CREATE TABLE IF NOT EXISTS `killers` " +
-                "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "name VARCHAR(32) UNIQUE," +
+        String query = "CREATE TABLE IF NOT EXISTS killers " +
+                "(" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "name VARCHAR(32) UNIQUE, " +
                 mons +
                 ");";
         plugin.log("Building database...");
@@ -153,10 +146,10 @@ public class SQLiteDatabase implements Database {
             }
         }
         plugin.log("... done!");
-        query = "SELECT COUNT(*) AS `total_killers` FROM `killers`;";
+        query = "SELECT ROWID AS total FROM killers ;";
         ResultSet res = state.executeQuery(query);
         if (res.next()) {
-            plugin.log("Total entries: " + res.getInt("total_killers"));
+            plugin.log("Total entries: " + res.getInt("total"));
         }
     }
 

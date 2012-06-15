@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.krinsoft</groupId>
-    <artifactId>deathcounter</artifactId>
+    <artifactId>killsuite</artifactId>
     <version>3.2.4</version>
-    <name>DeathCounter</name>
+    <name>KillSuite</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -58,11 +58,11 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.fernferret.allpay</pattern>
-                                    <shadedPattern>com.fernferret.allpay.deathcounter</shadedPattern>
+                                    <shadedPattern>com.fernferret.allpay.killsuite</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.pneumaticraft.commandhandler</pattern>
-                                    <shadedPattern>com.pneumaticraft.commandhandler.deathcounter</shadedPattern>
+                                    <shadedPattern>com.pneumaticraft.commandhandler.killsuite</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -99,7 +99,8 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.5-R1.0</version>
+            <version>1.2.5-R4.0</version>
+            <type>jar</type>
         </dependency>
         <!-- End Bukkit -->
 

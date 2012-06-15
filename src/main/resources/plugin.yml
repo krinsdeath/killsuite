@@ -1,14 +1,14 @@
-name: DeathCounter
-main: net.krinsoft.deathcounter.DeathCounter
+name: KillSuite
+main: net.krinsoft.killsuite.KillSuite
 version: maven-version-number
 author: krinsdeath
 load: startup
 
 commands:
-  deathcounter:
-    description: Main command for DeathCounter
+  killsuite:
+    description: Main command for KillSuite
     usage: /<command> [options]...
-    aliases: [dc]
+    aliases: [ks]
   stats:
     description: Show the statistics for the command sender or his specified target
     usage: /<command> [target] [-aomp]

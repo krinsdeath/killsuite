@@ -1,13 +1,13 @@
-package net.krinsoft.deathcounter;
+package net.krinsoft.killsuite;
 
 import com.fernferret.allpay.AllPay;
 import com.fernferret.allpay.GenericBank;
 import com.pneumaticraft.commandhandler.CommandHandler;
-import net.krinsoft.deathcounter.commands.*;
-import net.krinsoft.deathcounter.listeners.EntityListener;
-import net.krinsoft.deathcounter.listeners.PlayerListener;
-import net.krinsoft.deathcounter.listeners.ServerListener;
-import net.krinsoft.deathcounter.listeners.WorldListener;
+import net.krinsoft.killsuite.commands.*;
+import net.krinsoft.killsuite.listeners.EntityListener;
+import net.krinsoft.killsuite.listeners.PlayerListener;
+import net.krinsoft.killsuite.listeners.ServerListener;
+import net.krinsoft.killsuite.listeners.WorldListener;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author krinsdeath
  */
-public class DeathCounter extends JavaPlugin {
+public class KillSuite extends JavaPlugin {
     private boolean debug = false;
     private boolean economy = false;
     private boolean contract = false;
@@ -46,20 +46,34 @@ public class DeathCounter extends JavaPlugin {
     private CommandHandler commandHandler;
     
     private Manager manager;
-    private Tracker tracker;
+
+    private boolean deathcounter;
 
     @Override
     public void onEnable() {
         registerConfig();
+
+        if (!deathcounter) {
+            if (new File("plugins/DeathCounter/users.db").renameTo(new File(getDataFolder(), "users.db"))) {
+                log("Successfully imported SQLite database.");
+            }
+            if (new File("plugins/DeathCounter/users.yml").renameTo(new File(getDataFolder(), "users.yml"))) {
+                log("Successfully imported YAML database.");
+            }
+            if (new File("plugins/DeathCounter/config.yml").renameTo(new File(getDataFolder(), "config.yml"))) {
+                log("Imported DeathCounter config file.");
+            }
+            registerConfig(true);
+            deathcounter = true;
+            getConfig().set("plugin.imported", true);
+            saveConfig();
+        }
 
         if (economy) {
             if (validateAllPay()) {
                 log("Economy successfully hooked.");
             }
         }
-        
-        // build the kill tracker
-        tracker = new Tracker(this);
         
         // register all the players
         manager = new Manager(this);
@@ -80,10 +94,10 @@ public class DeathCounter extends JavaPlugin {
         saveTask = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
-                getTracker().save();
+                getManager().save();
                 saveLeaders();
             }
-        }, 300, 300 * 20);
+        }, 300L, 300L * 20L);
         
         log("Enabled successfully.");
     }
@@ -93,9 +107,8 @@ public class DeathCounter extends JavaPlugin {
         saveLeaders();
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
-        tracker.save();
+        manager.save();
         manager.disable();
-        tracker = null;
         manager = null;
         bank = null;
         log("Disabled successfully.");
@@ -113,7 +126,7 @@ public class DeathCounter extends JavaPlugin {
     }
 
     /**
-     * Forces a reload of DeathCounter's configuration file
+     * Forces a reload of KillSuite's configuration file
      * @param val true will reload the files; false does nothing
      */
     public void registerConfig(boolean val) {
@@ -129,14 +142,50 @@ public class DeathCounter extends JavaPlugin {
         if (!configFile.exists()) {
             getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
             getConfig().options().copyDefaults(true);
+            getConfig().options().header("#########\n" +
+                    "#\n" +
+                    "# Database:\n" +
+                    "#   Available types are YAML, SQLite and MySQL\n" +
+                    "#   Database is used for SQLite and MySQL only\n" +
+                    "#   YAML entires are stored in users.yml in plugins/DeathCounter/\n" +
+                    "#\n" +
+                    "# Economy:\n" +
+                    "#   players->realism:\n" +
+                    "#     If this is true, the money awarded to the killer will be deducted\n" +
+                    "#     from the killed player's wallet (default false)\n" +
+                    "#   players->percentage:\n" +
+                    "#     If this is true, the money awarded to the killer will be a percentage\n" +
+                    "#     of the killed player's wallet (default true)\n" +
+                    "#   diminish->depth:\n" +
+                    "#     For every point underneath this value a player is underground, the 'return' value\n" +
+                    "#     will be deducted (as a percentage) from the total payout for that kill\n" +
+                    "#   diminish->return:\n" +
+                    "#     A value to deduct per kill per point of depth (as a percentage) from each kill\n" +
+                    "#     Maximum of 100\n" +
+                    "#\n" +
+                    "# Contracts:\n" +
+                    "#   If contracts is set to true, players will be able to create 'kill' contracts\n" +
+                    "#   to have other players killed. When a player with a contract on his head is killed,\n" +
+                    "#   the money from the contract is automatically deducted from the contract owner's\n" +
+                    "#   account and added to the killer's account, in addition to the normal kill reward. (default true)\n" +
+                    "#   Fee:\n" +
+                    "#     Fee determines how much it costs to create a contract to kill a player.\n" +
+                    "#   Max:\n" +
+                    "#     The maximum number of contracts available at a time.\n" +
+                    "#\n" +
+                    "# Save Interval:\n" +
+                    "#   This determines how often (in seconds) the plugin will save all records.\n" +
+                    "# Report:\n" +
+                    "#   If this is true, the plugin will report kills and earnings to players as they're made\n" +
+                    "#\n" +
+                    "#########");
             saveConfig();
         }
-        if (getConfig().get("economy.monsters.ocelot") == null) {
+        if (getConfig().get("economy.animals.ocelot") == null) {
             List<Double> list = new ArrayList<Double>();
             list.add(3.0);
             list.add(5.0);
-            getConfig().set("economy.monsters.ocelot", list);
-            getConfig().set("economy.monsters.golem", list);
+            getConfig().set("economy.animals.ocelot", list);
             getConfig().set("economy.monsters.irongolem", list);
             saveConfig();
         }
@@ -150,7 +199,6 @@ public class DeathCounter extends JavaPlugin {
         if (getLeaders().get("ocelot") == null) {
             List<String> list = new ArrayList<String>();
             getLeaders().set("ocelot", list);
-            getLeaders().set("golem", list);
             getLeaders().set("irongolem", list);
             saveLeaders();
         }
@@ -193,7 +241,7 @@ public class DeathCounter extends JavaPlugin {
     }
 
     public void report(Player p, Monster m, double amt) {
-        if (report) {
+        if (report && amt > 0) {
             String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + "You killed a " + m.getFancyName();
             if (getBank() != null) {
                 try {
@@ -300,10 +348,6 @@ public class DeathCounter extends JavaPlugin {
         return bank;
     }
     
-    public Tracker getTracker() {
-        return tracker;
-    }
-
     public Manager getManager() {
         return manager;
     }

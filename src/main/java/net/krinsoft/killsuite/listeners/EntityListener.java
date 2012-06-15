@@ -1,27 +1,29 @@
-package net.krinsoft.deathcounter.listeners;
+package net.krinsoft.killsuite.listeners;
 
-import net.krinsoft.deathcounter.DeathCounter;
-import net.krinsoft.deathcounter.Monster;
+import net.krinsoft.killsuite.KillSuite;
+import net.krinsoft.killsuite.Monster;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.text.DecimalFormat;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author krinsdeath
  */
 @SuppressWarnings("unused")
 public class EntityListener implements Listener {
-    private DeathCounter plugin;
+    private Map<UUID, CreatureSpawnEvent.SpawnReason> reasons = new HashMap<UUID, CreatureSpawnEvent.SpawnReason>();
+    private KillSuite plugin;
     
-    public EntityListener(DeathCounter plugin) {
+    public EntityListener(KillSuite plugin) {
         this.plugin = plugin;
     }
 
@@ -45,6 +47,15 @@ public class EntityListener implements Listener {
                 }
             } else {
                 return;
+            }
+            double mod = 1;
+            CreatureSpawnEvent.SpawnReason reason = reasons.get(event.getEntity().getUniqueId());
+            if (reason != null && reason == CreatureSpawnEvent.SpawnReason.SPAWNER) {
+                if (plugin.getConfig().getBoolean("economy.spawner.payout", true)) {
+                    mod = plugin.getConfig().getDouble("economy.spawner.diminish", 0.50);
+                } else {
+                    return;
+                }
             }
             Monster monster = Monster.getType(event.getEntity());
             plugin.getManager().getKiller(killer.getName()).update(monster.getName());
@@ -75,6 +86,7 @@ public class EntityListener implements Listener {
                         }
                     }
                     amount = plugin.diminishReturn(killer, amount);
+                    amount = amount * mod;
                     plugin.getBank().give(killer, amount, -1);
                 } catch (NullPointerException e) {
                     plugin.debug(e.getLocalizedMessage() + ": Found null path at 'economy." + monster.getCategory() + "." + monster.getName() + "' in 'config.yml'");
@@ -85,5 +97,16 @@ public class EntityListener implements Listener {
             plugin.report(killer, monster, amount);
         }
     }
-    
+
+    @EventHandler
+    void creatureSpawn(CreatureSpawnEvent event) {
+        UUID id = event.getEntity().getUniqueId();
+        CreatureSpawnEvent.SpawnReason reason = reasons.get(id);
+        if (reason == null) {
+            reasons.put(id, event.getSpawnReason());
+            return;
+        }
+        plugin.debug("Duplicate monster ID; ignoring update to the map!");
+    }
+
 }

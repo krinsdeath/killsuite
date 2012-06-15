@@ -1,20 +1,19 @@
-package net.krinsoft.deathcounter.listeners;
+package net.krinsoft.killsuite.listeners;
 
-import net.krinsoft.deathcounter.DeathCounter;
+import net.krinsoft.killsuite.KillSuite;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  * @author krinsdeath
  */
 @SuppressWarnings("unused")
 public class PlayerListener implements Listener {
-    private DeathCounter plugin;
+    private KillSuite plugin;
     
-    public PlayerListener(DeathCounter plugin) {
+    public PlayerListener(KillSuite plugin) {
         this.plugin = plugin;
     }
 
@@ -23,10 +22,4 @@ public class PlayerListener implements Listener {
         plugin.getManager().register(event.getPlayer().getName());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void playerQuit(PlayerQuitEvent event) {
-        plugin.getTracker().update(event.getPlayer().getName());
-        plugin.getManager().unregister(event.getPlayer().getName());
-    }
-    
 }
