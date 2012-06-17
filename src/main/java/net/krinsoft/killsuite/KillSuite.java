@@ -244,9 +244,9 @@ public class KillSuite extends JavaPlugin {
         }
     }
 
-    public void report(Player p, Monster m, double amt) {
+    public void report(Player p, Monster m, double amt, boolean pet) {
         if (report) {
-            String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + "You killed a " + m.getFancyName();
+            String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + (!pet ? "You" : "Your pet") + " killed a " + m.getFancyName();
             if (getBank() != null && amt > 0) {
                 try {
                     message = message + " worth " + getBank().getFormattedAmount(p, amt, -1);

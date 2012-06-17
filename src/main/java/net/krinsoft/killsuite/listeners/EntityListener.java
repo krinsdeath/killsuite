@@ -5,6 +5,7 @@ import net.krinsoft.killsuite.Monster;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -42,6 +43,7 @@ public class EntityListener implements Listener {
             // cast to entity damage by entity to check the cause of the damage
             EntityDamageByEntityEvent evt = (EntityDamageByEntityEvent) event.getEntity().getLastDamageCause();
             Player killer;
+            boolean pet = false;
             if (evt.getDamager() instanceof Player) {
                 // damager was a player
                 killer = (Player) evt.getDamager();
@@ -55,6 +57,9 @@ public class EntityListener implements Listener {
                     reasons.remove(event.getEntity().getUniqueId());
                     return;
                 }
+            } else if (evt.getDamager() instanceof Tameable && ((Tameable)evt.getDamager()).isTamed() && ((Tameable)evt.getDamager()).getOwner() != null && ((Tameable)evt.getDamager()).getOwner() instanceof Player) {
+                pet = true;
+                killer = (Player) ((Tameable)evt.getDamager()).getOwner();
             } else {
                 reasons.remove(event.getEntity().getUniqueId());
                 return;
@@ -114,7 +119,7 @@ public class EntityListener implements Listener {
                     }
                 }
                 // report the earnings
-                plugin.report(killer, monster, amount);
+                plugin.report(killer, monster, amount, pet);
             } else {
                 plugin.getLogger().warning("An error occurred while incrementing the monster count for '" + killer.getName() + "'!");
                 plugin.getLogger().warning(plugin.getManager().getKiller(killer.getName()).toString());
