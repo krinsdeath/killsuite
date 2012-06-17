@@ -54,6 +54,10 @@ public class KillSuite extends JavaPlugin {
     @Override
     public void onEnable() {
         long startup = System.currentTimeMillis();
+
+        // simple notices registration
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "SimpleNotice");
+
         registerConfig();
 
         if (!deathcounter) {
@@ -254,7 +258,12 @@ public class KillSuite extends JavaPlugin {
                     debug("An error occurred while attempting to fetch the currency format string: " + e.getLocalizedMessage());
                 }
             }
-            p.sendMessage(message + ".");
+            message += ".";
+            if (p.getListeningPluginChannels().contains("SimpleNotice")) {
+                p.sendPluginMessage(this, "SimpleNotice", message.getBytes());
+            } else {
+                p.sendMessage(message);
+            }
         }
         updateLeaderboards(p, m);
     }
