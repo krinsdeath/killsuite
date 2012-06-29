@@ -260,7 +260,7 @@ public class KillSuite extends JavaPlugin {
             }
             message += ".";
             if (p.getListeningPluginChannels().contains("SimpleNotice")) {
-                p.sendPluginMessage(this, "SimpleNotice", message.getBytes());
+                p.sendPluginMessage(this, "SimpleNotice", message.getBytes(java.nio.charset.Charset.forName("UTF-8")));
             } else {
                 p.sendMessage(message);
             }
