@@ -1,6 +1,5 @@
 package net.krinsoft.killsuite;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,14 +9,17 @@ public class Killer {
     private final KillSuite plugin;
     private final int ID;
     private final String name;
-    private final Map<String, Integer> kills = new HashMap<String, Integer>();
+    //private final Map<Monster, Integer> kills = new HashMap<Monster, Integer>(26);
 
-    public Killer(KillSuite inst, String name, Map<String, Integer> kills) {
+    private final int[] killed = new int[32];
+
+    public Killer(KillSuite inst, String name, Map<Monster, Integer> kills) {
         this.plugin = inst;
         this.ID = name.hashCode();
         this.name = name;
-        this.kills.clear();
-        this.kills.putAll(kills);
+        for (Monster m : kills.keySet()) {
+            killed[m.ordinal()] = kills.get(m);
+        }
     }
     
     public String getName() {
@@ -27,25 +29,26 @@ public class Killer {
     public int get(String field) {
         Monster m = Monster.getType(field);
         if (m == null) { return -1; }
-        return kills.get(m.getName());
+        return killed[m.ordinal()];
+    }
+
+    public int get(Monster field) {
+        return killed[field.ordinal()];
     }
     
     public int update(String field) {
         long n = System.nanoTime();
         Monster m = Monster.getType(field);
         if (m == null) { return -1; }
-        int k = kills.get(m.getName()) + 1;
-        plugin.debug("Incrementing " + m.getFancyName() + " from " + (k - 1) + " to " + k);
-        kills.put(m.getName(), k);
-        n = System.nanoTime() - n;
-        plugin.profile("killer.update", n);
-        return k;
+        killed[m.ordinal()] += 1;
+        plugin.profile("killer.update", System.nanoTime() - n);
+        return killed[m.ordinal()];
     }
 
     public long total() {
         long total = 0;
-        for (Integer kills : this.kills.values()) {
-            total += kills;
+        for (Integer k : killed) {
+            total += k;
         }
         return total;
     }
@@ -65,9 +68,10 @@ public class Killer {
     
     @Override
     public boolean equals(Object o) {
+        if (o == null) { return false; }
         if (this == o) { return true; }
         if (this.getClass() != o.getClass()) { return false; }
         Killer killer = (Killer) o;
-        return killer.hashCode() == this.hashCode() || killer.toString().equals(this.toString());
+        return killer.hashCode() == this.hashCode();
     }
 }

@@ -33,6 +33,7 @@ public class KillSuite extends JavaPlugin {
     private boolean contract = false;
     private boolean report = true;
     private List<String> worlds = new ArrayList<String>();
+    private boolean leaders = true;
     private int saveTask;
 
     private FileConfiguration configuration;
@@ -198,6 +199,10 @@ public class KillSuite extends JavaPlugin {
             getConfig().set("economy.monsters.irongolem", list);
             saveConfig();
         }
+        if (getConfig().get("plugin.leaders") == null) {
+            getConfig().set("plugin.leaders", true);
+            getConfig().set("plugin.profiler", false);
+        }
 
         leaderFile = new File(getDataFolder(), "leaders.yml");
         if (!leaderFile.exists()) {
@@ -217,7 +222,8 @@ public class KillSuite extends JavaPlugin {
         contract = getConfig().getBoolean("plugin.contracts", false);
         report = getConfig().getBoolean("plugin.report", true);
         worlds = getConfig().getStringList("plugin.exclude_worlds");
-        profile = getConfig().getBoolean("plugin.profiler", true);
+        leaders = getConfig().getBoolean("plugin.leaders", true);
+        profile = getConfig().getBoolean("plugin.profiler", false);
     }
 
     private void registerCommands() {
@@ -244,12 +250,13 @@ public class KillSuite extends JavaPlugin {
     
     public void debug(String message) {
         if (debug) {
-            message = "[Debug] " + message;
-            getLogger().info(message);
+            StringBuilder msg = new StringBuilder("[Debug] ").append(message);
+            getLogger().info(msg.toString());
         }
     }
 
     public void report(Player p, Monster m, double amt, boolean pet) {
+        long time = System.nanoTime();
         if (report) {
             String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + (!pet ? "You" : "Your pet") + " killed a " + m.getFancyName();
             if (getBank() != null && amt > 0) {
@@ -266,7 +273,10 @@ public class KillSuite extends JavaPlugin {
                 p.sendMessage(message);
             }
         }
-        updateLeaderboards(p, m);
+        if (leaders) {
+            updateLeaderboards(p, m);
+        }
+        profile("report.update", System.nanoTime() - time);
     }
     
     public void displayLeaderboards(CommandSender s, Monster m) {
@@ -430,9 +440,11 @@ public class KillSuite extends JavaPlugin {
     public void profile(String section, long time) {
         if (profile) {
             long n = getProfiler().getLong(section);
-            long average = (n + time) / 2;
+            int count = getProfiler().getInt(section + ".count", 0) + 1;
+            long average = n + time;
             getProfiler().set(section, average);
-            getLogger().info(section + " average: " + average + "ns (" + average / 1000000 + "ms)");
+            getProfiler().set(section + ".count", count);
+            getLogger().info(section + " took " + time + "ns [average (over " + count + "): " + (average / count) + "ns (" + (average / count) / 1000000 + "ms)]");
         }
     }
 

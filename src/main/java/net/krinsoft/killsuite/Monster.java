@@ -39,7 +39,7 @@ public enum Monster {
     IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
     OCELOT("ocelot", "Ocelot", "animals"),
     ;
-    private static Map<EntityType, Monster> monsters = new HashMap<EntityType, Monster>() {
+    private static Map<EntityType, Monster> monsters = new HashMap<EntityType, Monster>(26) {
         {
             put(EntityType.CHICKEN, CHICKEN);
             put(EntityType.COW, COW);

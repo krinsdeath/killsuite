@@ -67,15 +67,15 @@ public class SQLiteDatabase implements Database {
             Statement state = conn.createStatement();
             String query = "SELECT * FROM killers WHERE name='" + player + "';";
             ResultSet result = state.executeQuery(query);
-            Map<String, Integer> kills = new HashMap<String, Integer>();
+            Map<Monster, Integer> kills = new HashMap<Monster, Integer>();
             if (result.next()) {
                 for (Monster m : Monster.values()) {
-                    kills.put(m.getName(), result.getInt(m.getName()));
+                    kills.put(m, result.getInt(m.getName()));
                 }
                 plugin.debug("Loading player '" + player + "'...");
             } else {
                 for (Monster m : Monster.values()) {
-                    kills.put(m.getName(), 0);
+                    kills.put(m, 0);
                 }
                 plugin.debug("New player: " + player + "! Creating default entry...");
             }

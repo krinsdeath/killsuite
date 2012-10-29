@@ -36,14 +36,14 @@ public class YamlDatabase implements Database {
     @Override
     public Killer fetch(String player) {
         plugin.debug("Loading player '" + player + "'...");
-        Map<String, Integer> kills = new HashMap<String, Integer>();
+        Map<Monster, Integer> kills = new HashMap<Monster, Integer>();
         ConfigurationSection users = this.users.getConfigurationSection(player);
         if (users == null) {
             makeNode(player);
             users = this.users.getConfigurationSection(player);
         }
         for (Monster m : Monster.values()) {
-            kills.put(m.getName(), users.getInt(m.getName(), 0));
+            kills.put(m, users.getInt(m.getName(), 0));
         }
         return new Killer(plugin, player, kills);
     }
