@@ -15,14 +15,14 @@ import java.util.Arrays;
  */
 @SuppressWarnings("unused")
 public class ServerListener implements Listener {
-    private KillSuite plugin;
+    private final KillSuite plugin;
     
     public ServerListener(KillSuite plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void pluginEnable(PluginEnableEvent event) {
+    void pluginEnable(PluginEnableEvent event) {
         if (Arrays.asList(AllPay.getValidEconPlugins()).contains(event.getPlugin().getDescription().getName())) {
             if (this.plugin.validateAllPay()) {
                 this.plugin.debug("Economy plugin successfully hooked.");
@@ -31,7 +31,7 @@ public class ServerListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void pluginDisable(PluginDisableEvent event) {
+    void pluginDisable(PluginDisableEvent event) {
         if (Arrays.asList(AllPay.getValidEconPlugins()).contains(event.getPlugin().getDescription().getName())) {
             this.plugin.validateAllPay(false);
         }

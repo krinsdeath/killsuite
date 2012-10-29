@@ -14,8 +14,8 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class SQLiteDatabase implements Database {
-    private KillSuite plugin;
-    private String connectionURL;
+    private final KillSuite plugin;
+    private final String connectionURL;
 
     public SQLiteDatabase(KillSuite plugin) {
         this.plugin = plugin;
@@ -25,7 +25,7 @@ public class SQLiteDatabase implements Database {
             Connection conn = DriverManager.getConnection(connectionURL);
             Statement state = conn.createStatement();
             loadDatabase(state);
-            loadKillers(state);
+            loadKillers();
             state.close();
             conn.close();
         } catch (ClassNotFoundException e) {
@@ -153,7 +153,7 @@ public class SQLiteDatabase implements Database {
         }
     }
 
-    private void loadKillers(Statement state) throws SQLException {
+    private void loadKillers() {
         plugin.debug("Fetching players...");
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             plugin.getManager().register(fetch(p.getName()));

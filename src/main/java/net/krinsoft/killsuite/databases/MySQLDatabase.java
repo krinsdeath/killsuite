@@ -16,11 +16,11 @@ import java.util.Vector;
  */
 @SuppressWarnings("unused")
 public class MySQLDatabase implements Database {
-    private KillSuite plugin;
-    private String connectionURL;
-    private String username;
-    private String password;
-    private Vector<Connection> connections = new Vector<Connection>();
+    private final KillSuite plugin;
+    private final String connectionURL;
+    private final String username;
+    private final String password;
+    // --Commented out by Inspection (9/25/12 4:52 PM):private Vector<Connection> connections = new Vector<Connection>();
     
     public MySQLDatabase(KillSuite plugin) {
         this.plugin = plugin;
@@ -36,7 +36,7 @@ public class MySQLDatabase implements Database {
             Statement state = conn.createStatement();
             plugin.log("Connection to MySQL Established Successfully.");
             loadDatabase(state);
-            loadKillers(state);
+            loadKillers();
             state.close();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -169,7 +169,7 @@ public class MySQLDatabase implements Database {
         }
     }
     
-    private void loadKillers(Statement state) throws SQLException {
+    private void loadKillers() {
         plugin.debug("Fetching players...");
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             plugin.getManager().register(fetch(p.getName()));

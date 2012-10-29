@@ -15,8 +15,8 @@ import java.util.Set;
  * @author krinsdeath
  */
 public class Manager {
-    private KillSuite plugin;
-    private Map<String, Killer> killers = new HashMap<String, Killer>();
+    private final KillSuite plugin;
+    private final Map<String, Killer> killers = new HashMap<String, Killer>();
 
     private Database database;
     

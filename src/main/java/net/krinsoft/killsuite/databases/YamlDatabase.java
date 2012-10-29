@@ -16,8 +16,8 @@ import java.util.Map;
  * @author krinsdeath
  */
 public class YamlDatabase implements Database {
-    private KillSuite plugin;
-    private FileConfiguration users;
+    private final KillSuite plugin;
+    private final FileConfiguration users;
     
     public YamlDatabase(KillSuite plugin) {
         this.plugin = plugin;

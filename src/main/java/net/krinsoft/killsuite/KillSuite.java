@@ -113,6 +113,7 @@ public class KillSuite extends JavaPlugin {
     public void onDisable() {
         eListener.save();
         saveLeaders();
+        if (profile) { saveProfiler(); }
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
         manager.save();
@@ -145,7 +146,7 @@ public class KillSuite extends JavaPlugin {
         }
     }
 
-    protected void registerConfig() {
+    void registerConfig() {
         configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             getConfig().setDefaults(YamlConfiguration.loadConfiguration(this.getClass().getResourceAsStream("/config.yml")));
@@ -216,7 +217,7 @@ public class KillSuite extends JavaPlugin {
         contract = getConfig().getBoolean("plugin.contracts", false);
         report = getConfig().getBoolean("plugin.report", true);
         worlds = getConfig().getStringList("plugin.exclude_worlds");
-
+        profile = getConfig().getBoolean("plugin.profiler", true);
     }
 
     private void registerCommands() {
@@ -348,7 +349,7 @@ public class KillSuite extends JavaPlugin {
     }
     
     public void validateAllPay(boolean val) {
-        if (!val) {
+        if (val) {
             economy = false;
             bank = null;
             debug("Economy plugin unhooked.");
@@ -376,14 +377,14 @@ public class KillSuite extends JavaPlugin {
         return configuration;
     }
 
-    protected FileConfiguration getLeaders() {
+    FileConfiguration getLeaders() {
         if (leaderboards == null) {
             leaderboards = YamlConfiguration.loadConfiguration(leaderFile);
         }
         return leaderboards;
     }
     
-    public void saveLeaders() {
+    void saveLeaders() {
         try {
             leaderboards.save(new File(getDataFolder(), "leaders.yml"));
         } catch (IOException e) {
@@ -404,4 +405,35 @@ public class KillSuite extends JavaPlugin {
         amount = (amount - (amount * (diminish)));
         return (amount > 0 ? amount : 0);
     }
+
+    /*
+     * Profiler Methods
+     */
+    private FileConfiguration profiler;
+    private boolean profile;
+
+    public FileConfiguration getProfiler() {
+        if (profiler == null) {
+            profiler = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "profiler.yml"));
+        }
+        return profiler;
+    }
+
+    public void saveProfiler() {
+        try {
+            profiler.save(new File(getDataFolder(), "profiler.yml"));
+        } catch (IOException e) {
+            debug("Error saving file 'profiler.yml'");
+        }
+    }
+
+    public void profile(String section, long time) {
+        if (profile) {
+            long n = getProfiler().getLong(section);
+            long average = (n + time) / 2;
+            getProfiler().set(section, average);
+            getLogger().info(section + " average: " + average + "ns (" + average / 1000000 + "ms)");
+        }
+    }
+
 }

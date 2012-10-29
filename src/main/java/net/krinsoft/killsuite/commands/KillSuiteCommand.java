@@ -8,15 +8,15 @@ import org.bukkit.command.CommandSender;
 /**
  * @author krinsdeath
  */
-public abstract class KillSuiteCommand extends Command {
-    protected KillSuite plugin;
+abstract class KillSuiteCommand extends Command {
+    final KillSuite plugin;
     
-    public KillSuiteCommand(KillSuite plugin) {
+    KillSuiteCommand(KillSuite plugin) {
         super(plugin);
         this.plugin = plugin;
     }
 
-    public void message(CommandSender sender, String message) {
+    void message(CommandSender sender, String message) {
         sender.sendMessage(ChatColor.GOLD + "[KillSuite] " + ChatColor.WHITE + message);
     }
 

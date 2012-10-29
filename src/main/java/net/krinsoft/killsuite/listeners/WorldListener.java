@@ -11,7 +11,7 @@ import org.bukkit.event.world.WorldLoadEvent;
  */
 @SuppressWarnings("unused")
 public class WorldListener implements Listener {
-    private KillSuite plugin;
+    private final KillSuite plugin;
     
     public WorldListener(KillSuite plugin) {
         this.plugin = plugin;

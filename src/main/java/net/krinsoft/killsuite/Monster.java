@@ -4,7 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author krinsdeath
@@ -35,9 +37,38 @@ public enum Monster {
     VILLAGER("villager", "Villager", "others"),
     PLAYER("player", "Player", "players"),
     IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
-    //SNOW_GOLEM("snowgolem", "Snow Golem", "monsters"),
     OCELOT("ocelot", "Ocelot", "animals"),
     ;
+    private static Map<EntityType, Monster> monsters = new HashMap<EntityType, Monster>() {
+        {
+            put(EntityType.CHICKEN, CHICKEN);
+            put(EntityType.COW, COW);
+            put(EntityType.PIG, PIG);
+            put(EntityType.SHEEP, SHEEP);
+            put(EntityType.SQUID, SQUID);
+            put(EntityType.WOLF, WOLF);
+            put(EntityType.CAVE_SPIDER, CAVE_SPIDER);
+            put(EntityType.CREEPER, CREEPER);
+            put(EntityType.ENDER_DRAGON, ENDER_DRAGON);
+            put(EntityType.ENDERMAN, ENDERMAN);
+            put(EntityType.GHAST, GHAST);
+            put(EntityType.GIANT, GIANT);
+            put(EntityType.PIG_ZOMBIE, PIG_ZOMBIE);
+            put(EntityType.SILVERFISH, SILVERFISH);
+            put(EntityType.SKELETON, SKELETON);
+            put(EntityType.SLIME, SLIME);
+            put(EntityType.SPIDER, SPIDER);
+            put(EntityType.ZOMBIE, ZOMBIE);
+            put(EntityType.BLAZE, BLAZE);
+            put(EntityType.MAGMA_CUBE, MAGMA_CUBE);
+            put(EntityType.MUSHROOM_COW, MUSHROOM_COW);
+            put(EntityType.SNOWMAN, SNOWMAN);
+            put(EntityType.VILLAGER, VILLAGER);
+            put(EntityType.PLAYER, PLAYER);
+            put(EntityType.IRON_GOLEM, IRON_GOLEM);
+            put(EntityType.OCELOT, OCELOT);
+        }
+    };
 
     private final String dbname;
     private final String name;
@@ -85,45 +116,6 @@ public enum Monster {
     }
     
     public static Monster getType(Entity e) {
-        if (e instanceof Chicken) { return CHICKEN; }
-        if (e instanceof Cow) {
-            if (e instanceof MushroomCow) { return MUSHROOM_COW; }
-            return COW;
-        }
-        if (e instanceof Pig) { return PIG; }
-        if (e instanceof Sheep) { return SHEEP; }
-        if (e instanceof Squid) { return SQUID; }
-        if (e instanceof Wolf) { return WOLF; }
-        if (e instanceof Spider) {
-            if (e instanceof CaveSpider) { return CAVE_SPIDER; }
-            return SPIDER;
-        }
-        if (e instanceof Creeper) { return CREEPER; }
-        if (e instanceof EnderDragon) { return ENDER_DRAGON; }
-        if (e instanceof Enderman) { return ENDERMAN; }
-        if (e instanceof Ghast) { return GHAST; }
-        if (e instanceof Giant) { return GIANT; }
-        if (e instanceof Zombie) {
-            if (e instanceof PigZombie) { return PIG_ZOMBIE; }
-            return ZOMBIE;
-        }
-        if (e instanceof Silverfish) { return SILVERFISH; }
-        if (e instanceof Skeleton) { return SKELETON; }
-        if (e instanceof Slime) {
-            if (e instanceof MagmaCube) { return MAGMA_CUBE; }
-            return SLIME;
-        }
-        if (e instanceof Blaze) { return BLAZE; }
-        if (e instanceof Snowman) { return SNOWMAN; }
-        if (e instanceof Villager) { return VILLAGER; }
-        if (e instanceof Player) { return PLAYER; }
-        // 1.2 creatures
-        if (e instanceof Golem) {
-            if (e instanceof IronGolem) { return IRON_GOLEM; }
-            //if (e instanceof SnowGolem) { return SNOW_GOLEM; }
-            //return GOLEM;
-        }
-        if (e instanceof Ocelot) { return OCELOT; }
-        return null;
+        return monsters.get(e.getType());
     }
 }

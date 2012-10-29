@@ -26,7 +26,7 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public class EntityListener implements Listener {
     private Set<UUID> reasons = new HashSet<UUID>();
-    private KillSuite plugin;
+    private final KillSuite plugin;
     
     public EntityListener(KillSuite plugin) {
         this.plugin = plugin;
@@ -35,6 +35,7 @@ public class EntityListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     void entityDeath(EntityDeathEvent event) {
+        long n = System.nanoTime();
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
         if (!(event.getEntity() instanceof LivingEntity)) { return; }
@@ -111,7 +112,9 @@ public class EntityListener implements Listener {
                         }
                         amount = plugin.diminishReturn(killer, amount);
                         amount = amount * mod;
+                        long bank = System.nanoTime();
                         plugin.getBank().give(killer, amount, -1);
+                        plugin.profile("bank.update", System.nanoTime() - bank);
                     } catch (NullPointerException e) {
                         plugin.debug(e.getLocalizedMessage() + ": Found null path at 'economy." + monster.getCategory() + "." + monster.getName() + "' in 'config.yml'");
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -125,7 +128,9 @@ public class EntityListener implements Listener {
                 plugin.getLogger().warning(plugin.getManager().getKiller(killer.getName()).toString());
             }
         }
+        n = System.nanoTime() - n;
         reasons.remove(event.getEntity().getUniqueId());
+        plugin.profile("entity.death", n);
     }
 
     @EventHandler
@@ -143,6 +148,7 @@ public class EntityListener implements Listener {
         try {
             File idFile = new File(plugin.getDataFolder(), "uuid_spawner.dat");
             if (!idFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 idFile.createNewFile();
             }
             FileOutputStream fileOut = new FileOutputStream(idFile);
@@ -156,15 +162,17 @@ public class EntityListener implements Listener {
         }
     }
 
-    public void load() {
+    void load() {
         try {
             File idFile = new File(plugin.getDataFolder(), "uuid_spawner.dat");
             if (idFile.exists()) {
                 FileInputStream fileIn = new FileInputStream(idFile);
                 ObjectInputStream objIn = new ObjectInputStream(fileIn);
+                //noinspection unchecked
                 reasons = (Set<UUID>) objIn.readObject();
                 objIn.close();
                 fileIn.close();
+                //noinspection ResultOfMethodCallIgnored
                 idFile.delete();
             }
         } catch (FileNotFoundException e) {

@@ -9,8 +9,8 @@ import java.util.List;
  * @author krinsdeath
  */
 public class FancyMessage {
-    private String header;
-    private List<String> lines = new ArrayList<String>();
+    private final String header;
+    private final List<String> lines = new ArrayList<String>();
     
     public FancyMessage(Killer killer, String category) {
         List<Monster> monsters = Monster.getAllInCategory(category);

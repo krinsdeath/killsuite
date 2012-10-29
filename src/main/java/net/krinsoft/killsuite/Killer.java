@@ -7,10 +7,10 @@ import java.util.Map;
  * @author krinsdeath
  */
 public class Killer {
-    private KillSuite plugin;
-    private int ID;
-    private String name;
-    private Map<String, Integer> kills = new HashMap<String, Integer>();
+    private final KillSuite plugin;
+    private final int ID;
+    private final String name;
+    private final Map<String, Integer> kills = new HashMap<String, Integer>();
 
     public Killer(KillSuite inst, String name, Map<String, Integer> kills) {
         this.plugin = inst;
@@ -31,11 +31,15 @@ public class Killer {
     }
     
     public int update(String field) {
+        long n = System.nanoTime();
         Monster m = Monster.getType(field);
         if (m == null) { return -1; }
-        plugin.debug("Incrementing " + m.getFancyName() + " from " + kills.get(m.getName()) + " to " + (kills.get(m.getName()) + 1));
-        kills.put(m.getName(), (kills.get(m.getName()) + 1));
-        return kills.get(m.getName());
+        int k = kills.get(m.getName()) + 1;
+        plugin.debug("Incrementing " + m.getFancyName() + " from " + (k - 1) + " to " + k);
+        kills.put(m.getName(), k);
+        n = System.nanoTime() - n;
+        plugin.profile("killer.update", n);
+        return k;
     }
 
     public long total() {

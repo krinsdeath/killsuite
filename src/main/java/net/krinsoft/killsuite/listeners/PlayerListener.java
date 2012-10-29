@@ -11,14 +11,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
  */
 @SuppressWarnings("unused")
 public class PlayerListener implements Listener {
-    private KillSuite plugin;
+    private final KillSuite plugin;
     
     public PlayerListener(KillSuite plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void playerJoin(PlayerJoinEvent event) {
+    void playerJoin(PlayerJoinEvent event) {
         plugin.getManager().register(event.getPlayer().getName());
     }
 
