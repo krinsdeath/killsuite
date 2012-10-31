@@ -12,34 +12,37 @@ import java.util.Map;
  * @author krinsdeath
  */
 public enum Monster {
+    BAT("bat", "Bat", "animals"),
+    BLAZE("blaze", "Blaze", "others"),
+    CAVE_SPIDER("cavespider", "Cave Spider", "monsters"),
     CHICKEN("chicken", "Chicken", "animals"),
     COW("cow", "Cow", "animals"),
-    PIG("pig", "Pig", "animals"),
-    SHEEP("sheep", "Sheep", "animals"),
-    SQUID("squid", "Squid", "animals"),
-    WOLF("wolf", "Wolf", "animals"),
-    CAVE_SPIDER("cavespider", "Cave Spider", "monsters"),
     CREEPER("creeper", "Creeper", "monsters"),
     ENDER_DRAGON("enderdragon", "Ender Dragon", "monsters"),
     ENDERMAN("enderman", "Enderman", "monsters"),
     GHAST("ghast", "Ghast", "monsters"),
     GIANT("giant", "Giant", "monsters"),
+    IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
+    MAGMA_CUBE("lavaslime", "Magma Cube", "others"),
+    MUSHROOM_COW("mushroomcow", "Mushroom Cow", "others"),
+    OCELOT("ocelot", "Ocelot", "animals"),
+    PIG("pig", "Pig", "animals"),
     PIG_ZOMBIE("pigzombie", "Pig Zombie", "monsters"),
+    PLAYER("player", "Player", "players"),
+    SHEEP("sheep", "Sheep", "animals"),
     SILVERFISH("silverfish", "Silverfish", "monsters"),
     SKELETON("skeleton", "Skeleton Archer", "monsters"),
     SLIME("slime", "Slime", "monsters"),
-    SPIDER("spider", "Spider", "monsters"),
-    ZOMBIE("zombie", "Zombie", "monsters"),
-    BLAZE("blaze", "Blaze", "others"),
-    MAGMA_CUBE("lavaslime", "Magma Cube", "others"),
-    MUSHROOM_COW("mushroomcow", "Mushroom Cow", "others"),
     SNOWMAN("snowman", "Snowman", "others"),
+    SQUID("squid", "Squid", "animals"),
+    SPIDER("spider", "Spider", "monsters"),
     VILLAGER("villager", "Villager", "others"),
-    PLAYER("player", "Player", "players"),
-    IRON_GOLEM("irongolem", "Iron Golem", "monsters"),
-    OCELOT("ocelot", "Ocelot", "animals"),
+    WITCH("witch", "Witch", "monsters"),
+    WITHER_BOSS("witherboss", "Wither Boss", "monsters"),
+    WOLF("wolf", "Wolf", "animals"),
+    ZOMBIE("zombie", "Zombie", "monsters"),
     ;
-    private static Map<EntityType, Monster> monsters = new HashMap<EntityType, Monster>(26) {
+    private static Map<EntityType, Monster> monsters = new HashMap<EntityType, Monster>(29) {
         {
             put(EntityType.CHICKEN, CHICKEN);
             put(EntityType.COW, COW);
@@ -67,6 +70,9 @@ public enum Monster {
             put(EntityType.PLAYER, PLAYER);
             put(EntityType.IRON_GOLEM, IRON_GOLEM);
             put(EntityType.OCELOT, OCELOT);
+            put(EntityType.BAT, BAT);
+            put(EntityType.WITCH, WITCH);
+            put(EntityType.WITHER, WITHER_BOSS);
         }
     };
 
