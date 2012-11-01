@@ -119,6 +119,8 @@ public class EntityListener implements Listener {
                         plugin.debug(e.getLocalizedMessage() + ": Found null path at 'economy." + monster.getCategory() + "." + monster.getName() + "' in 'config.yml'");
                     } catch (ArrayIndexOutOfBoundsException e) {
                         plugin.debug(e.getLocalizedMessage() + ": Invalid list at 'economy." + monster.getCategory() + "." + monster.getName() + "'");
+                    } catch (IndexOutOfBoundsException e) {
+                        plugin.getLogger().warning(e.getLocalizedMessage() + ": Invalid economy list in config.yml! Probable culprit: " + monster.getCategory() + "/" + monster.getName());
                     }
                 }
                 // report the earnings
