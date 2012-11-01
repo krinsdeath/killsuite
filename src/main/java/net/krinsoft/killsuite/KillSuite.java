@@ -431,7 +431,7 @@ public class KillSuite extends JavaPlugin {
 
     public void saveProfiler() {
         try {
-            profiler.save(new File(getDataFolder(), "profiler.yml"));
+            getProfiler().save(new File(getDataFolder(), "profiler.yml"));
         } catch (IOException e) {
             debug("Error saving file 'profiler.yml'");
         }
