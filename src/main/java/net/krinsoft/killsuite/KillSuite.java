@@ -8,9 +8,11 @@ import net.krinsoft.killsuite.listeners.EntityListener;
 import net.krinsoft.killsuite.listeners.PlayerListener;
 import net.krinsoft.killsuite.listeners.ServerListener;
 import net.krinsoft.killsuite.listeners.WorldListener;
+import net.krinsoft.killsuite.util.RewardGenerator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -77,14 +79,16 @@ public class KillSuite extends JavaPlugin {
             saveConfig();
         }
 
+        // register all the players
+        manager = new Manager(this);
+
+        // register economy features
         if (economy) {
             if (validateAllPay()) {
                 debug("Economy successfully hooked.");
+                generateRewards();
             }
         }
-        
-        // register all the players
-        manager = new Manager(this);
 
         registerCommands();
 
@@ -374,6 +378,25 @@ public class KillSuite extends JavaPlugin {
             validateAllPay();
         }
         return bank;
+    }
+
+    private void generateRewards() {
+        debug("Populating random reward generator...");
+        ConfigurationSection econ = getConfig().getConfigurationSection("economy");
+        for (Monster monster : Monster.values()) {
+            List<Double> vals;
+            try {
+                if (monster.getName().equals("player")) {
+                    vals = econ.getDoubleList("players.reward");
+                } else {
+                    vals = econ.getDoubleList(monster.getCategory() + "." + monster.getName());
+                }
+                RewardGenerator reward = new RewardGenerator(vals.get(0), vals.get(1));
+                manager.addReward(monster.getName(), reward);
+            } catch (IndexOutOfBoundsException e) {
+                getLogger().warning("An invalid/incomplete economy list was encountered! Probable culprit: " + monster.getCategory() + "/" + monster.getName());
+            }
+        }
     }
     
     public Manager getManager() {

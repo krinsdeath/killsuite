@@ -4,6 +4,7 @@ import net.krinsoft.killsuite.databases.Database;
 import net.krinsoft.killsuite.databases.MySQLDatabase;
 import net.krinsoft.killsuite.databases.SQLiteDatabase;
 import net.krinsoft.killsuite.databases.YamlDatabase;
+import net.krinsoft.killsuite.util.RewardGenerator;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Set;
 public class Manager {
     private final KillSuite plugin;
     private final Map<String, Killer> killers = new HashMap<String, Killer>();
+    private final Map<String, RewardGenerator> rewards = new HashMap<String, RewardGenerator>();
 
     private Database database;
     
@@ -97,6 +99,18 @@ public class Manager {
 
     public Set<Killer> getKillers() {
         return new HashSet<Killer>(killers.values());
+    }
+
+    public void addReward(String entry, RewardGenerator reward) {
+        rewards.put(entry, reward);
+    }
+
+    public double getReward(String entry) {
+        RewardGenerator r = rewards.get(entry);
+        if (r != null) {
+            return r.generateRandom();
+        }
+        return 0;
     }
     
 }

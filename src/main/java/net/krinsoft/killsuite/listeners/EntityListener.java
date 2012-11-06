@@ -84,44 +84,27 @@ public class EntityListener implements Listener {
             if (error > 0) {
                 double amount = 0;
                 if (plugin.getBank() != null) {
-                    // economy is enabled
-                    // multivariable calculus ensues ->
-                    try {
-                        if (!monster.getCategory().equalsIgnoreCase("players")) {
-                            List<Double> range = plugin.getConfig().getDoubleList("economy." + monster.getCategory() + "." + monster.getName());
-                            double min = range.get(0);
-                            double max = range.get(1);
-                            amount = Double.valueOf(new DecimalFormat("#.##").format(min + (Math.random() * ((max - min)))));
-                        } else {
-                            Player dead = (Player) event.getEntity();
-                            List<Double> range = plugin.getConfig().getDoubleList("economy.players.reward");
-                            double min = range.get(0);
-                            double max = range.get(1);
-                            amount = Double.valueOf(new DecimalFormat("#.##").format(min + (Math.random() * ((max - min)))));
-                            if (plugin.getConfig().getBoolean("economy.players.percentage")) {
-                                double balance = plugin.getBank().getBalance(dead, -1);
-                                amount = balance * (amount / 100);
-                            }
-                            if (plugin.getConfig().getBoolean("economy.players.realism")) {
-                                double balance = plugin.getBank().getBalance(dead, -1);
-                                if (amount > balance) {
-                                    amount = balance;
-                                }
-                                plugin.getBank().take(dead, amount, -1);
-                            }
+                    // economy is enabled, so let's find the reward
+                    amount = plugin.getManager().getReward(monster.getName());
+                    if (monster.getName().equals("player")) {
+                        Player dead = (Player) event.getEntity();
+                        if (plugin.getConfig().getBoolean("economy.players.percentage")) {
+                            double balance = plugin.getBank().getBalance(dead, -1);
+                            amount = balance * (amount / 100);
                         }
-                        amount = plugin.diminishReturn(killer, amount);
-                        amount = amount * mod;
-                        long bank = System.nanoTime();
-                        plugin.getBank().give(killer, amount, -1);
-                        plugin.profile("bank.update", System.nanoTime() - bank);
-                    } catch (NullPointerException e) {
-                        plugin.debug(e.getLocalizedMessage() + ": Found null path at 'economy." + monster.getCategory() + "." + monster.getName() + "' in 'config.yml'");
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        plugin.debug(e.getLocalizedMessage() + ": Invalid list at 'economy." + monster.getCategory() + "." + monster.getName() + "'");
-                    } catch (IndexOutOfBoundsException e) {
-                        plugin.getLogger().warning(e.getLocalizedMessage() + ": Invalid economy list in config.yml! Probable culprit: " + monster.getCategory() + "/" + monster.getName());
+                        if (plugin.getConfig().getBoolean("economy.players.realism")) {
+                            double balance = plugin.getBank().getBalance(dead, -1);
+                            if (amount > balance) {
+                                amount = balance;
+                            }
+                            plugin.getBank().take(dead, amount, -1);
+                        }
                     }
+                    amount = plugin.diminishReturn(killer, amount);
+                    amount = amount * mod;
+                    long bank = System.nanoTime();
+                    plugin.getBank().give(killer, amount, -1);
+                    plugin.profile("bank.update", System.nanoTime() - bank);
                 }
                 // report the earnings
                 plugin.report(killer, monster, amount, pet);
