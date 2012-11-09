@@ -2,7 +2,6 @@ package net.krinsoft.killsuite.listeners;
 
 import net.krinsoft.killsuite.KillSuite;
 import net.krinsoft.killsuite.Monster;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
@@ -13,10 +12,14 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import java.io.*;
-import java.text.DecimalFormat;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,7 +41,6 @@ public class EntityListener implements Listener {
         long n = System.nanoTime();
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
-        if (!(event.getEntity() instanceof LivingEntity)) { return; }
         // see if the event was an entity killing another entity
         if (event.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent) {
             // cast to entity damage by entity to check the cause of the damage
