@@ -308,7 +308,7 @@ public class KillSuite extends JavaPlugin {
             if (search > leaders.size()) {
                 search = leaders.size();
             }
-            if (leaders.size() / 5 > page) {
+            if (leaders.size() / 5 < page) {
                 page = 0;
             }
             List<Leader> list = new ArrayList<Leader>();

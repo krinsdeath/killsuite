@@ -29,7 +29,7 @@ public class LeaderCommand extends KillSuiteCommand {
     @Override
     public void runCommand(CommandSender sender, List<String> args) {
         Monster m = Monster.PLAYER;
-        if (args.size() == 1) {
+        if (args.size() >= 1) {
             m = Monster.getType(args.get(0));
         }
         try {
