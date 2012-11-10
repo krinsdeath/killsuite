@@ -11,29 +11,32 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.LazyMetadataValue;
 
 /**
  * @author krinsdeath
  */
 @SuppressWarnings("unused")
 public class EntityListener implements Listener {
-    private Set<UUID> reasons = new HashSet<UUID>();
+    private LazyMetadataValue meta;
     private final KillSuite plugin;
+
+    private final boolean spawner_payout;
+    private final double spawner_mod;
+
+    private final boolean player_percent;
+    private final boolean player_realism;
     
     public EntityListener(KillSuite plugin) {
         this.plugin = plugin;
-        load();
+        this.meta = new FixedMetadataValue(plugin, true);
+        // spawner options
+        this.spawner_payout = plugin.getConfig().getBoolean("economy.spawner.payout", true);
+        this.spawner_mod = plugin.getConfig().getDouble("economy.spawner.diminish", 0.50);
+        // player options
+        this.player_percent = plugin.getConfig().getBoolean("economy.players.percentage", false);
+        this.player_realism = plugin.getConfig().getBoolean("economy.players.realism", false);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -45,6 +48,7 @@ public class EntityListener implements Listener {
         if (event.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent) {
             // cast to entity damage by entity to check the cause of the damage
             EntityDamageByEntityEvent evt = (EntityDamageByEntityEvent) event.getEntity().getLastDamageCause();
+            long find_killer = System.nanoTime();
             Player killer;
             boolean pet = false;
             if (evt.getDamager() instanceof Player) {
@@ -57,44 +61,47 @@ public class EntityListener implements Listener {
                     killer = (Player) ((Projectile)evt.getDamager()).getShooter();
                 } else {
                     // shooter was a monster
-                    reasons.remove(event.getEntity().getUniqueId());
                     return;
                 }
             } else if (evt.getDamager() instanceof Tameable && ((Tameable)evt.getDamager()).isTamed() && ((Tameable)evt.getDamager()).getOwner() != null && ((Tameable)evt.getDamager()).getOwner() instanceof Player) {
                 pet = true;
                 killer = (Player) ((Tameable)evt.getDamager()).getOwner();
             } else {
-                reasons.remove(event.getEntity().getUniqueId());
                 return;
             }
+            plugin.profile("killer.find", System.nanoTime() - find_killer);
+            long test_spawner = System.nanoTime();
             double mod = 1;
-            if (reasons.contains(event.getEntity().getUniqueId())) {
+            if (event.getEntity().hasMetadata("spawner")) {
                 plugin.debug("Encountered spawned mob.");
                 // check if the admin wants to pay users for spawner mobs
-                if (plugin.getConfig().getBoolean("economy.spawner.payout", true)) {
+                if (spawner_payout) {
                     // diminish the payout
-                    mod = plugin.getConfig().getDouble("economy.spawner.diminish", 0.50);
+                    mod = spawner_mod;
                 } else {
                     plugin.debug("Payout disabled for spawner mobs.");
                     // cancel the tracking / reward
-                    reasons.remove(event.getEntity().getUniqueId());
                     return;
                 }
             }
+            plugin.profile("monster.spawner", System.nanoTime() - test_spawner);
+            long fetch = System.nanoTime();
             Monster monster = Monster.getType(event.getEntity());
+            plugin.profile("monster.fetch", System.nanoTime() - fetch);
             double error = plugin.getManager().getKiller(killer.getName()).update(monster.getName());
             if (error > 0) {
                 double amount = 0;
                 if (plugin.getBank() != null) {
+                    long calc = System.nanoTime();
                     // economy is enabled, so let's find the reward
                     amount = plugin.getManager().getReward(monster.getName());
                     if (monster.getName().equals("player")) {
                         Player dead = (Player) event.getEntity();
-                        if (plugin.getConfig().getBoolean("economy.players.percentage")) {
+                        if (player_percent) {
                             double balance = plugin.getBank().getBalance(dead, -1);
                             amount = balance * (amount / 100);
                         }
-                        if (plugin.getConfig().getBoolean("economy.players.realism")) {
+                        if (player_realism) {
                             double balance = plugin.getBank().getBalance(dead, -1);
                             if (amount > balance) {
                                 amount = balance;
@@ -104,6 +111,7 @@ public class EntityListener implements Listener {
                     }
                     amount = plugin.diminishReturn(killer, amount);
                     amount = amount * mod;
+                    plugin.profile("bank.calculate", System.nanoTime() - calc);
                     long bank = System.nanoTime();
                     plugin.getBank().give(killer, amount, -1);
                     plugin.profile("bank.update", System.nanoTime() - bank);
@@ -116,58 +124,13 @@ public class EntityListener implements Listener {
             }
         }
         n = System.nanoTime() - n;
-        reasons.remove(event.getEntity().getUniqueId());
         plugin.profile("entity.death", n);
     }
 
     @EventHandler
     void creatureSpawn(CreatureSpawnEvent event) {
-        if (!plugin.validWorld(event.getEntity().getWorld().getName())) {
-            return;
-        }
-        UUID id = event.getEntity().getUniqueId();
-        if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER && !reasons.contains(id)) {
-            reasons.add(id);
-        }
-    }
-
-    public void save() {
-        try {
-            File idFile = new File(plugin.getDataFolder(), "uuid_spawner.dat");
-            if (!idFile.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                idFile.createNewFile();
-            }
-            FileOutputStream fileOut = new FileOutputStream(idFile);
-            ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
-            objOut.writeObject(reasons);
-            objOut.close();
-        } catch (FileNotFoundException e) {
-            plugin.getLogger().warning(e.getMessage());
-        } catch (IOException e) {
-            plugin.getLogger().warning(e.getMessage());
-        }
-    }
-
-    void load() {
-        try {
-            File idFile = new File(plugin.getDataFolder(), "uuid_spawner.dat");
-            if (idFile.exists()) {
-                FileInputStream fileIn = new FileInputStream(idFile);
-                ObjectInputStream objIn = new ObjectInputStream(fileIn);
-                //noinspection unchecked
-                reasons = (Set<UUID>) objIn.readObject();
-                objIn.close();
-                fileIn.close();
-                //noinspection ResultOfMethodCallIgnored
-                idFile.delete();
-            }
-        } catch (FileNotFoundException e) {
-            plugin.getLogger().warning(e.getMessage());
-        } catch (IOException e) {
-            plugin.getLogger().warning(e.getMessage());
-        } catch (ClassNotFoundException e) {
-            plugin.getLogger().warning(e.getMessage());
+        if (plugin.validWorld(event.getEntity().getWorld().getName()) && event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER) {
+            event.getEntity().setMetadata("spawner", meta);
         }
     }
 

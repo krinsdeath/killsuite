@@ -50,8 +50,6 @@ public class KillSuite extends JavaPlugin {
     
     private Manager manager;
 
-    private EntityListener eListener;
-
     private boolean deathcounter;
 
     @Override
@@ -93,7 +91,8 @@ public class KillSuite extends JavaPlugin {
         registerCommands();
 
         // event listeners
-        eListener = new EntityListener(this);
+
+        EntityListener eListener = new EntityListener(this);
         PlayerListener pListener = new PlayerListener(this);
         ServerListener sListener = new ServerListener(this);
         WorldListener wListener = new WorldListener(this);
@@ -116,7 +115,6 @@ public class KillSuite extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        eListener.save();
         saveLeaders();
         if (profile) { saveProfiler(); }
         getServer().getScheduler().cancelTasks(this);
@@ -259,28 +257,34 @@ public class KillSuite extends JavaPlugin {
         }
     }
 
-    public void report(Player p, Monster m, double amt, boolean pet) {
-        long time = System.nanoTime();
-        if (report) {
-            String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + (!pet ? "You" : "Your pet") + " killed a " + m.getFancyName();
-            if (getBank() != null && amt > 0) {
-                try {
-                    message = message + " worth " + getBank().getFormattedAmount(p, amt, -1);
-                } catch (Exception e) {
-                    debug("An error occurred while attempting to fetch the currency format string: " + e.getLocalizedMessage());
+    public void report(final Player p, final Monster m, final double amt, final boolean pet) {
+        final KillSuite plugin = this;
+        getServer().getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
+            @Override
+            public void run() {
+                long time = System.nanoTime();
+                if (report) {
+                    String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + (!pet ? "You" : "Your pet") + " killed a " + m.getFancyName();
+                    if (getBank() != null && amt > 0) {
+                        try {
+                            message = message + " worth " + getBank().getFormattedAmount(p, amt, -1);
+                        } catch (Exception e) {
+                            debug("An error occurred while attempting to fetch the currency format string: " + e.getLocalizedMessage());
+                        }
+                    }
+                    message += ".";
+                    if (p.getListeningPluginChannels().contains("SimpleNotice")) {
+                        p.sendPluginMessage(plugin, "SimpleNotice", message.getBytes(java.nio.charset.Charset.forName("UTF-8")));
+                    } else {
+                        p.sendMessage(message);
+                    }
                 }
+                if (leaders) {
+                    updateLeaderboards(p, m);
+                }
+                profile("report.update", System.nanoTime() - time);
             }
-            message += ".";
-            if (p.getListeningPluginChannels().contains("SimpleNotice")) {
-                p.sendPluginMessage(this, "SimpleNotice", message.getBytes(java.nio.charset.Charset.forName("UTF-8")));
-            } else {
-                p.sendMessage(message);
-            }
-        }
-        if (leaders) {
-            updateLeaderboards(p, m);
-        }
-        profile("report.update", System.nanoTime() - time);
+        }, 1L);
     }
     
     public void displayLeaderboards(CommandSender s, Monster m) {
@@ -467,7 +471,7 @@ public class KillSuite extends JavaPlugin {
             long average = n + time;
             getProfiler().set(section, average);
             getProfiler().set(section + ".count", count);
-            getLogger().info(section + " took " + time + "ns [average (over " + count + "): " + (average / count) + "ns (" + (average / count) / 1000000 + "ms)]");
+            getLogger().info(section + " took " + time + "ns (" + (time / 1000000) + "ms)");
         }
     }
 
