@@ -44,20 +44,17 @@ public class EntityListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     void entityDeath(EntityDeathEvent event) {
-        LinkedList<String> profiler = plugin.profileList();
-        //Thread.dumpStack();
-        //plugin.getLogger().info("--- EntityDeathEvent");
         long n = System.nanoTime();
         String world = event.getEntity().getWorld().getName();
         if (!plugin.validWorld(world)) { return; }
-        profiler.add("entity.death.start took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+        KillSuite.addProfileMessage("entity.death.start", System.nanoTime() - n);
         // see if the event was an entity killing another entity
         if (!(event.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent)) {
             return;
         }
         // cast to entity damage by entity to check the cause of the damage
         EntityDamageByEntityEvent evt = (EntityDamageByEntityEvent) event.getEntity().getLastDamageCause();
-        profiler.add("killer.find.start took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+        KillSuite.addProfileMessage("killer.find.start", System.nanoTime() - n);
         Player killer;
         boolean pet = false;
         Entity e = evt.getDamager();
@@ -79,9 +76,8 @@ public class EntityListener implements Listener {
         } else {
             return;
         }
-        profiler.add("killer.find.end took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
-        profiler.add("monster.spawner.start took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
-        //plugin.profile("monster.spawner.start", System.nanoTime() - n);
+        KillSuite.addProfileMessage("killer.find.end", System.nanoTime() - n);
+        KillSuite.addProfileMessage("monster.spawner.start", System.nanoTime() - n);
         double mod = 1;
         if (event.getEntity().hasMetadata("spawner")) {
             //plugin.debug("Encountered spawned mob.");
@@ -95,15 +91,15 @@ public class EntityListener implements Listener {
                 return;
             }
         }
-        profiler.add("monster.spawner.end took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
-        profiler.add("monster.fetch.start took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+        KillSuite.addProfileMessage("monster.spawner.end", System.nanoTime() - n);
+        KillSuite.addProfileMessage("monster.fetch.start", System.nanoTime() - n);
         Monster monster = Monster.getType(event.getEntity());
-        profiler.add("monster.fetch.end took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+        KillSuite.addProfileMessage("monster.fetch.end", System.nanoTime() - n);
         double error = plugin.getManager().getKiller(killer.getName()).update(monster.getName());
         if (error > 0) {
             double amount = 0;
             if (plugin.getBank() != null) {
-                profiler.add("bank.calculate.start took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+                KillSuite.addProfileMessage("bank.calculate.start", System.nanoTime() - n);
                 // economy is enabled, so let's find the reward
                 amount = plugin.getManager().getReward(monster.getName());
                 if (monster.getName().equals("player")) {
@@ -122,10 +118,10 @@ public class EntityListener implements Listener {
                 }
                 amount = plugin.diminishReturn(killer, amount);
                 amount = amount * mod;
-                profiler.add("bank.calculate.end took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
-                profiler.add("bank.update.start took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
-                //plugin.getBank().give(killer, amount, -1);
-                profiler.add("bank.update.end took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+                KillSuite.addProfileMessage("bank.calculate.end", System.nanoTime() - n);
+                KillSuite.addProfileMessage("bank.update.start", System.nanoTime() - n);
+                plugin.getBank().give(killer, amount, -1);
+                KillSuite.addProfileMessage("bank.update.end", System.nanoTime() - n);
             }
             // report the earnings
             plugin.report(killer, monster, amount, pet);
@@ -133,7 +129,7 @@ public class EntityListener implements Listener {
             plugin.getLogger().warning("An error occurred while incrementing the monster count for '" + killer.getName() + "'!");
             plugin.getLogger().warning(plugin.getManager().getKiller(killer.getName()).toString());
         }
-        profiler.add("entity.death.end took " + (System.nanoTime() - n) + "ns (" + ((System.nanoTime() - n) / 1000000) + "ms)");
+        KillSuite.addProfileMessage("entity.death.end", System.nanoTime() - n);
     }
 
     @EventHandler

@@ -31,6 +31,8 @@ import java.util.List;
  * @author krinsdeath
  */
 public class KillSuite extends JavaPlugin {
+    private static KillSuite plugin;
+
     private boolean debug = false;
     private boolean economy = false;
     private boolean contract = false;
@@ -57,6 +59,7 @@ public class KillSuite extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        plugin = this;
         long startup = System.currentTimeMillis();
 
         // simple notices registration
@@ -462,8 +465,8 @@ public class KillSuite extends JavaPlugin {
         }
     }
 
-    public LinkedList<String> profileList() {
-        return profileList;
+    public static void addProfileMessage(String section, long time) {
+        plugin.profileList.add(String.format("%1$s took %2$dns (%3$dms)", section, time, time / 1000000));
     }
 
 }

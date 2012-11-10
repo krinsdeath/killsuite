@@ -6,7 +6,7 @@
 
     <groupId>net.krinsoft</groupId>
     <artifactId>killsuite</artifactId>
-    <version>3.4</version>
+    <version>3.4.1</version>
     <name>KillSuite</name>
 
     <properties>
