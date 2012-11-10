@@ -9,7 +9,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -47,7 +55,30 @@ public class YamlDatabase implements Database {
         }
         return new Killer(plugin, player, kills);
     }
-    
+
+    @Override
+    public LinkedHashMap<String, Integer> fetchAll(String monster) {
+        LinkedHashMap<String, Integer> leaders = new LinkedHashMap<String, Integer>();
+        LinkedList<Map.Entry<String, Integer>> monsters = new LinkedList<Map.Entry<String, Integer>>();
+        Monster m = Monster.getType(monster);
+        if (m == null) { return null; }
+        for (String key : this.users.getKeys(false)) {
+            leaders.put(key, this.users.getInt(key + "." + m.getName()));
+        }
+        monsters.addAll(leaders.entrySet());
+        Collections.sort(monsters, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        leaders.clear();
+        for (Map.Entry<String, Integer> entry : monsters) {
+            leaders.put(entry.getKey(), entry.getValue());
+        }
+        return leaders;
+    }
+
     @Override
     public void save() {
         try {

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -292,79 +293,44 @@ public class KillSuite extends JavaPlugin {
                         p.sendMessage(message);
                     }
                 }
-                if (leaders) {
-                    updateLeaderboards(p, m);
-                }
             }
         }, 1L);
     }
     
-    public void displayLeaderboards(CommandSender s, Monster m) {
+    public void displayLeaderboards(CommandSender s, Monster m, int page) {
+        long n = System.nanoTime();
+        addProfileMessage("leaders.parse.start", System.nanoTime() - n);
         if (m == null) { return; }
         s.sendMessage("=== Leaderboards: " + m.getFancyName() + " ===");
         try {
-            int place = 1;
-            String eKiller;
-            int eKills;
-            List<String> leaders = getLeaders().getStringList(m.getName());
-            if (!leaders.isEmpty()) {
-                for (String entry : leaders) {
-                    eKiller = entry.split(":")[0];
-                    eKills = Integer.parseInt(entry.split(":")[1]);
-                    s.sendMessage(ChatColor.GOLD + "#" + place + " - " + ChatColor.GREEN + eKiller + ChatColor.WHITE + " - " + ChatColor.AQUA + eKills);
-                    place++;
-                }
+            LinkedHashMap<String, Integer> leaders = manager.fetchAll(m.getName());
+            int search = page * 5 + 5;
+            if (search > leaders.size()) {
+                search = leaders.size();
+            }
+            if (leaders.size() / 5 > page) {
+                page = 0;
+            }
+            List<Leader> list = new ArrayList<Leader>();
+            String[] keys = leaders.keySet().toArray(new String[leaders.size()]);
+            for (int i = page * 5; i < search; i++) {
+                list.add(new Leader(keys[i], leaders.get(keys[i]), i));
+            }
+            for (Leader l : list) {
+                s.sendMessage(String.format(ChatColor.GREEN + "%1$-4d " +
+                        ChatColor.GOLD + "|" + ChatColor.AQUA + " %2$s " +
+                        ChatColor.GOLD + "-" + ChatColor.BLUE + " %3$d",
+                        l.getRank()+1, l.getName(), l.getKills()));
             }
         } catch (NullPointerException e) {
-            debug("Something went wrong.");
-        } catch (NumberFormatException e) {
-            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
+            debug("Something went wrong. The fetched leader list was null!");
         } catch (IndexOutOfBoundsException e) {
-            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
+            debug("Some calculation was off; the index wasn't found!");
+            e.printStackTrace();
         }
+        addProfileMessage("leaders.parse.end", System.nanoTime() - n);
     }
-    
-    private void updateLeaderboards(Player p, Monster m) {
-        try {
-            int kills = manager.getKiller(p.getName()).get(m.getName()); // the provided player's kill count
-            List<String> leaders = getLeaders().getStringList(m.getName()); // the provided monster's current leaderboard
-            // if the leaderboard is empty, this player is guaranteed to have the highest kill count
-            if (leaders.isEmpty()) {
-                debug("Leader list was empty for " + m.getName());
-                leaders.add(0, p.getName() + ":" + kills);
-            }
-            // iterate through the list of leader:kills
-            for (int i = -1; i < leaders.size(); i++) {
-                // will never be true if at least one player exists in the leader list
-                if (i+1 > leaders.size() && i+1 <= 4) {
-                    debug("Adding '" + p.getName() + ":" + kills +"' to list");
-                    leaders.add(i+1, p.getName() + ":" + kills);
-                    break;
-                }
-                // check if this player's name exists in the list already and update it if it does
-                String[] a = leaders.get(i+1).split(":");
-                if (a[0].equals(p.getName())) {
-                    leaders.set(i+1, p.getName() + ":" + kills);
-                    break;
-                }
-                // check if this player's kills are higher than the loop's current kills
-                int eKills = Integer.parseInt(a[1]);
-                if (kills > eKills) {
-                    leaders.add(i+1, p.getName() + ":" + kills);
-                    break;
-                }
-            }
-            // set the updated list
-            getLeaders().set(m.getName(), leaders.subList(0, (leaders.size() > 4 ? 4 : leaders.size())));
-        } catch (NullPointerException e) {
-            debug("Something went wrong.");
-        } catch (NumberFormatException e) {
-            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
-        } catch (IndexOutOfBoundsException e) {
-            debug("An error occurred while parsing the leader list for '" + m.getName() + "'");
-        }
-    }
-    
+
     public boolean validateAllPay() {
         if (bank != null) { return true; }
         double allpayVersion = 3.1;

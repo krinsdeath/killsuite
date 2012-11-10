@@ -7,7 +7,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Vector;
 
@@ -102,6 +106,37 @@ public class MySQLDatabase implements Database {
     }
 
     @Override
+    public LinkedHashMap<String, Integer> fetchAll(String monster) {
+        LinkedHashMap<String, Integer> leaders = new LinkedHashMap<String, Integer>();
+        LinkedList<Map.Entry<String, Integer>> monsters = new LinkedList<Map.Entry<String, Integer>>();
+        Monster m = Monster.getType(monster);
+        if (m == null) { return null; }
+        try {
+            Connection conn = getConnection();
+            Statement state = conn.createStatement();
+            ResultSet result = state.executeQuery("SELECT " + m.getName() + ",name FROM killers;");
+            while (result.next()) {
+                leaders.put(result.getString("name"), result.getInt(m.getName()));
+            }
+            monsters.addAll(leaders.entrySet());
+            Collections.sort(monsters, new Comparator<Map.Entry<String, Integer>>() {
+                @Override
+                public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                    return o2.getValue().compareTo(o1.getValue());
+                }
+            });
+            leaders.clear();
+            for (Map.Entry<String, Integer> entry : monsters) {
+                leaders.put(entry.getKey(), entry.getValue());
+            }
+            return leaders;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public void save() {
         try {
             Connection conn = getConnection();
@@ -168,7 +203,7 @@ public class MySQLDatabase implements Database {
             plugin.log("Total KillSuite entries: " + res.getInt("total"));
         }
     }
-    
+
     private void loadKillers() {
         plugin.debug("Fetching players...");
         for (Player p : plugin.getServer().getOnlinePlayers()) {

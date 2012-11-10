@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -111,6 +112,10 @@ public class Manager {
             return r.generateRandom();
         }
         return 0;
+    }
+
+    public LinkedHashMap<String, Integer> fetchAll(String monster) {
+        return database.fetchAll(monster);
     }
     
 }
