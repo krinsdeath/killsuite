@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -36,7 +37,9 @@ public class KillSuite extends JavaPlugin {
     private boolean report = true;
     private List<String> worlds = new ArrayList<String>();
     private boolean leaders = true;
+    private boolean profile = false;
     private int saveTask;
+    private int profileTask;
 
     private FileConfiguration configuration;
     private File configFile;
@@ -109,6 +112,14 @@ public class KillSuite extends JavaPlugin {
                 saveLeaders();
             }
         }, 300L, 300L * 20L);
+
+        profileTask = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                profile(profileList, profile);
+                profileList.clear();
+            }
+        }, 1L, 1L);
         
         log("Enabled successfully. (" + (System.currentTimeMillis() - startup) + "ms)");
     }
@@ -116,9 +127,9 @@ public class KillSuite extends JavaPlugin {
     @Override
     public void onDisable() {
         saveLeaders();
-        if (profile) { saveProfiler(); }
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
+        getServer().getScheduler().cancelTask(profileTask);
         manager.save();
         manager.disable();
         manager = null;
@@ -262,7 +273,6 @@ public class KillSuite extends JavaPlugin {
         getServer().getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
             @Override
             public void run() {
-                long time = System.nanoTime();
                 if (report) {
                     String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + (!pet ? "You" : "Your pet") + " killed a " + m.getFancyName();
                     if (getBank() != null && amt > 0) {
@@ -282,7 +292,6 @@ public class KillSuite extends JavaPlugin {
                 if (leaders) {
                     updateLeaderboards(p, m);
                 }
-                profile("report.update", System.nanoTime() - time);
             }
         }, 1L);
     }
@@ -443,36 +452,18 @@ public class KillSuite extends JavaPlugin {
         return (amount > 0 ? amount : 0);
     }
 
-    /*
-     * Profiler Methods
-     */
-    private FileConfiguration profiler;
-    private boolean profile;
+    private LinkedList<String> profileList = new LinkedList<String>();
 
-    public FileConfiguration getProfiler() {
-        if (profiler == null) {
-            profiler = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "profiler.yml"));
-        }
-        return profiler;
-    }
-
-    public void saveProfiler() {
-        try {
-            getProfiler().save(new File(getDataFolder(), "profiler.yml"));
-        } catch (IOException e) {
-            debug("Error saving file 'profiler.yml'");
-        }
-    }
-
-    public void profile(String section, long time) {
+    public void profile(LinkedList<String> list, boolean profile) {
         if (profile) {
-            long n = getProfiler().getLong(section);
-            int count = getProfiler().getInt(section + ".count", 0) + 1;
-            long average = n + time;
-            getProfiler().set(section, average);
-            getProfiler().set(section + ".count", count);
-            getLogger().info(section + " took " + time + "ns (" + (time / 1000000) + "ms)");
+            for (String line : list) {
+                getLogger().info(line);
+            }
         }
+    }
+
+    public LinkedList<String> profileList() {
+        return profileList;
     }
 
 }

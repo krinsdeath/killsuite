@@ -37,11 +37,9 @@ public class Killer {
     }
     
     public int update(String field) {
-        long n = System.nanoTime();
         Monster m = Monster.getType(field);
         if (m == null) { return -1; }
         killed[m.ordinal()] += 1;
-        plugin.profile("killer.update", System.nanoTime() - n);
         return killed[m.ordinal()];
     }
 
