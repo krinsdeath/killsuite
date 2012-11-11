@@ -43,6 +43,7 @@ public class KillSuite extends JavaPlugin {
     private boolean profile = false;
     private int saveTask;
     private int profileTask;
+    private int econTask;
 
     private FileConfiguration configuration;
     private File configFile;
@@ -120,8 +121,20 @@ public class KillSuite extends JavaPlugin {
         profileTask = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
-                profile(profileList, profile);
-                profileList.clear();
+                if (profileList.size() > 0) {
+                    profile(profileList, profile);
+                    profileList.clear();
+                }
+            }
+        }, 1L, 1L);
+
+        econTask = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                if (transactions.size() > 0) {
+                    transact(transactions);
+                    transactions.clear();
+                }
             }
         }, 1L, 1L);
         
@@ -134,6 +147,7 @@ public class KillSuite extends JavaPlugin {
         getServer().getScheduler().cancelTasks(this);
         getServer().getScheduler().cancelTask(saveTask);
         getServer().getScheduler().cancelTask(profileTask);
+        getServer().getScheduler().cancelTask(econTask);
         manager.save();
         manager.disable();
         manager = null;
@@ -267,8 +281,8 @@ public class KillSuite extends JavaPlugin {
     
     public void debug(String message) {
         if (debug) {
-            StringBuilder msg = new StringBuilder("[Debug] ").append(message);
-            getLogger().info(msg.toString());
+            String msg = "[Debug] " + message;
+            getLogger().info(msg);
         }
     }
 
@@ -421,6 +435,10 @@ public class KillSuite extends JavaPlugin {
         return (amount > 0 ? amount : 0);
     }
 
+    /*
+     * Profiling Data
+     */
+
     private LinkedList<String> profileList = new LinkedList<String>();
 
     public void profile(LinkedList<String> list, boolean profile) {
@@ -432,7 +450,25 @@ public class KillSuite extends JavaPlugin {
     }
 
     public static void addProfileMessage(String section, long time) {
-        plugin.profileList.add(String.format("%1$s took %2$dns (%3$dms)", section, time, time / 1000000));
+        if (plugin.profile) {
+            plugin.profileList.add(String.format("%1$s took %2$dns (%3$dms)", section, time, time / 1000000));
+        }
+    }
+
+    /*
+     * Economy Transactions
+     */
+
+    private LinkedList<Transaction> transactions = new LinkedList<Transaction>();
+
+    public void transact(LinkedList<Transaction> transactions) {
+        for (Transaction t : transactions) {
+            getBank().give(getServer().getPlayer(t.getName()), t.getAmount(), t.getType());
+        }
+    }
+
+    public static void addBankTransaction(String killer, double amt, int type) {
+        plugin.transactions.add(new Transaction(killer, amt, type));
     }
 
 }

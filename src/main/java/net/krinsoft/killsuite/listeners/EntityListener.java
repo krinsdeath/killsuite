@@ -120,7 +120,7 @@ public class EntityListener implements Listener {
                 amount = amount * mod;
                 KillSuite.addProfileMessage("bank.calculate.end", System.nanoTime() - n);
                 KillSuite.addProfileMessage("bank.update.start", System.nanoTime() - n);
-                plugin.getBank().give(killer, amount, -1);
+                KillSuite.addBankTransaction(killer.getName(), amount, -1);
                 KillSuite.addProfileMessage("bank.update.end", System.nanoTime() - n);
             }
             // report the earnings
