@@ -53,7 +53,7 @@ public class YamlDatabase implements Database {
         for (Monster m : Monster.values()) {
             kills.put(m, users.getInt(m.getName(), 0));
         }
-        return new Killer(plugin, player, kills);
+        return new Killer(player, kills);
     }
 
     @Override

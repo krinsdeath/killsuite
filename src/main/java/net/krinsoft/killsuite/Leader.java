@@ -3,7 +3,7 @@ package net.krinsoft.killsuite;
 /**
  * @author krinsdeath
  */
-public class Leader {
+class Leader {
 
     private final String name;
     private final int kills;

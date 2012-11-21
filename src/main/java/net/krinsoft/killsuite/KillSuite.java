@@ -39,7 +39,6 @@ public class KillSuite extends JavaPlugin {
     private boolean contract = false;
     private boolean report = true;
     private List<String> worlds = new ArrayList<String>();
-    private boolean leaders = true;
     private boolean profile = false;
     private int saveTask;
     private int profileTask;
@@ -253,7 +252,6 @@ public class KillSuite extends JavaPlugin {
         contract = getConfig().getBoolean("plugin.contracts", false);
         report = getConfig().getBoolean("plugin.report", true);
         worlds = getConfig().getStringList("plugin.exclude_worlds");
-        leaders = getConfig().getBoolean("plugin.leaders", true);
         profile = getConfig().getBoolean("plugin.profiler", false);
     }
 
@@ -439,9 +437,9 @@ public class KillSuite extends JavaPlugin {
      * Profiling Data
      */
 
-    private LinkedList<String> profileList = new LinkedList<String>();
+    private final LinkedList<String> profileList = new LinkedList<String>();
 
-    public void profile(LinkedList<String> list, boolean profile) {
+    void profile(LinkedList<String> list, boolean profile) {
         if (profile) {
             for (String line : list) {
                 getLogger().info(line);
@@ -459,9 +457,9 @@ public class KillSuite extends JavaPlugin {
      * Economy Transactions
      */
 
-    private LinkedList<Transaction> transactions = new LinkedList<Transaction>();
+    private final LinkedList<Transaction> transactions = new LinkedList<Transaction>();
 
-    public void transact(LinkedList<Transaction> transactions) {
+    void transact(LinkedList<Transaction> transactions) {
         for (Transaction t : transactions) {
             getBank().give(getServer().getPlayer(t.getName()), t.getAmount(), t.getType());
         }

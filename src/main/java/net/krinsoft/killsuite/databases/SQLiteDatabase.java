@@ -83,7 +83,7 @@ public class SQLiteDatabase implements Database {
                 }
                 plugin.debug("New player: " + player + "! Creating default entry...");
             }
-            killer = new Killer(plugin, player, kills);
+            killer = new Killer(player, kills);
             state.close();
             conn.close();
         } catch (SQLException e) {

@@ -6,7 +6,7 @@
 
     <groupId>net.krinsoft</groupId>
     <artifactId>killsuite</artifactId>
-    <version>3.4.1</version>
+    <version>3.4.2</version>
     <name>KillSuite</name>
 
     <properties>
@@ -113,7 +113,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.4.2-R0.1-SNAPSHOT</version>
+            <version>1.4.5-R0.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <!-- End Bukkit -->

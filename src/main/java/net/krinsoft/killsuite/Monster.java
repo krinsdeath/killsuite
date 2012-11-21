@@ -31,7 +31,8 @@ public enum Monster {
     PLAYER("player", "Player", "players"),
     SHEEP("sheep", "Sheep", "animals"),
     SILVERFISH("silverfish", "Silverfish", "monsters"),
-    SKELETON("skeleton", "Skeleton Archer", "monsters"),
+    SKELETON("skeleton", "Skeleton", "monsters"),
+    SKELETON_WITHER("witherskeleton", "Wither Skeleton", "monsters"),
     SLIME("slime", "Slime", "monsters"),
     SNOWMAN("snowman", "Snowman", "others"),
     SQUID("squid", "Squid", "animals"),
@@ -42,7 +43,7 @@ public enum Monster {
     WOLF("wolf", "Wolf", "animals"),
     ZOMBIE("zombie", "Zombie", "monsters"),
     ;
-    private static Map<EntityType, Monster> monsters = new HashMap<EntityType, Monster>(29) {
+    private final static Map<Object, Monster> monsters = new HashMap<Object, Monster>(Monster.values().length) {
         {
             put(EntityType.CHICKEN, CHICKEN);
             put(EntityType.COW, COW);
@@ -58,7 +59,8 @@ public enum Monster {
             put(EntityType.GIANT, GIANT);
             put(EntityType.PIG_ZOMBIE, PIG_ZOMBIE);
             put(EntityType.SILVERFISH, SILVERFISH);
-            put(EntityType.SKELETON, SKELETON);
+            put(Skeleton.SkeletonType.NORMAL, SKELETON);
+            put(Skeleton.SkeletonType.WITHER, SKELETON_WITHER);
             put(EntityType.SLIME, SLIME);
             put(EntityType.SPIDER, SPIDER);
             put(EntityType.ZOMBIE, ZOMBIE);
@@ -122,6 +124,10 @@ public enum Monster {
     }
     
     public static Monster getType(Entity e) {
-        return monsters.get(e.getType());
+        Object type = e.getType();
+        if (e instanceof Skeleton) {
+            type = ((Skeleton) e).getSkeletonType();
+        }
+        return monsters.get(type);
     }
 }

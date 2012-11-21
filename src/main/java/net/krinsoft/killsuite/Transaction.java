@@ -3,7 +3,7 @@ package net.krinsoft.killsuite;
 /**
  * @author krinsdeath
  */
-public class Transaction {
+class Transaction {
 
     private final String name;
     private final double amount;

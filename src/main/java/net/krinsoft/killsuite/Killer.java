@@ -1,20 +1,18 @@
 package net.krinsoft.killsuite;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
  * @author krinsdeath
  */
 public class Killer {
-    private final KillSuite plugin;
     private final int ID;
     private final String name;
-    //private final Map<Monster, Integer> kills = new HashMap<Monster, Integer>(26);
 
     private final int[] killed = new int[32];
 
-    public Killer(KillSuite inst, String name, Map<Monster, Integer> kills) {
-        this.plugin = inst;
+    public Killer(String name, Map<Monster, Integer> kills) {
         this.ID = name.hashCode();
         this.name = name;
         for (Monster m : kills.keySet()) {
@@ -61,6 +59,7 @@ public class Killer {
         int hash = 19;
         hash = hash * 15 + (this.toString().hashCode());
         hash = hash + this.ID;
+        hash = hash + Arrays.toString(this.killed).hashCode();
         return hash;
     }
     

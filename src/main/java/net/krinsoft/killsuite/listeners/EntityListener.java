@@ -15,14 +15,12 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.LazyMetadataValue;
 
-import java.util.LinkedList;
-
 /**
  * @author krinsdeath
  */
 @SuppressWarnings("unused")
 public class EntityListener implements Listener {
-    private LazyMetadataValue meta;
+    private final LazyMetadataValue meta;
     private final KillSuite plugin;
 
     private final boolean spawner_payout;
