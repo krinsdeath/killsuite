@@ -6,14 +6,18 @@ import net.krinsoft.killsuite.Monster;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * @author krinsdeath
@@ -24,8 +28,7 @@ public class MySQLDatabase implements Database {
     private final String connectionURL;
     private final String username;
     private final String password;
-    // --Commented out by Inspection (9/25/12 4:52 PM):private Vector<Connection> connections = new Vector<Connection>();
-    
+
     public MySQLDatabase(KillSuite plugin) {
         this.plugin = plugin;
         ConfigurationSection conf = plugin.getConfig().getConfigurationSection("database");
@@ -40,7 +43,7 @@ public class MySQLDatabase implements Database {
             Statement state = conn.createStatement();
             plugin.log("Connection to MySQL Established Successfully.");
             loadDatabase(state);
-            loadKillers();
+            //loadKillers();
             state.close();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

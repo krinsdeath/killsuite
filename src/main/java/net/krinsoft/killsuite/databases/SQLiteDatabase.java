@@ -29,7 +29,6 @@ public class SQLiteDatabase implements Database {
             Connection conn = DriverManager.getConnection(connectionURL);
             Statement state = conn.createStatement();
             loadDatabase(state);
-            loadKillers();
             state.close();
             conn.close();
         } catch (ClassNotFoundException e) {
