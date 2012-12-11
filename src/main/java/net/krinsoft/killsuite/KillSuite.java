@@ -461,7 +461,10 @@ public class KillSuite extends JavaPlugin {
 
     void transact(LinkedList<Transaction> transactions) {
         for (Transaction t : transactions) {
-            getBank().give(getServer().getPlayer(t.getName()), t.getAmount(), t.getType());
+            Player p = getServer().getPlayer(t.getName());
+            if (p != null) {
+                getBank().give(p, t.getAmount(), t.getType());
+            }
         }
     }
 
