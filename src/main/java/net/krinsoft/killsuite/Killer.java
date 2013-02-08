@@ -12,6 +12,8 @@ public class Killer {
 
     private final int[] killed = new int[32];
 
+    private int kills = 0;
+
     public Killer(String name, Map<Monster, Integer> kills) {
         this.ID = name.hashCode();
         this.name = name;
@@ -38,7 +40,20 @@ public class Killer {
         Monster m = Monster.getType(field);
         if (m == null) { return -1; }
         killed[m.ordinal()] += 1;
+        attenuate();
         return killed[m.ordinal()];
+    }
+
+    private void attenuate() {
+        kills++;
+    }
+
+    public int getAttenuation() {
+        return kills;
+    }
+
+    public void resetAttenuation() {
+        kills = 0;
     }
 
     public long total() {

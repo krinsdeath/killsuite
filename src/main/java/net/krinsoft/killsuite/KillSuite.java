@@ -43,6 +43,7 @@ public class KillSuite extends JavaPlugin {
     private int saveTask;
     private int profileTask;
     private int econTask;
+    private int attenuater;
 
     private FileConfiguration configuration;
     private File configFile;
@@ -136,7 +137,20 @@ public class KillSuite extends JavaPlugin {
                 }
             }
         }, 1L, 1L);
-        
+
+        long atten = getConfig().getLong("economy.diminish.period", 360L) * 20L * 60L;
+        if (atten <= 0) {
+            atten = 20L * 60L * 360L;
+        }
+        attenuater = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                for (Killer k : getManager().getKillers()) {
+                    k.resetAttenuation();
+                }
+            }
+        }, 1L, atten);
+
         log("Enabled successfully. (" + (System.currentTimeMillis() - startup) + "ms)");
     }
 
@@ -147,6 +161,7 @@ public class KillSuite extends JavaPlugin {
         getServer().getScheduler().cancelTask(saveTask);
         getServer().getScheduler().cancelTask(profileTask);
         getServer().getScheduler().cancelTask(econTask);
+        getServer().getScheduler().cancelTask(attenuater);
         manager.save();
         manager.disable();
         manager = null;
@@ -424,12 +439,23 @@ public class KillSuite extends JavaPlugin {
     }
 
     public double diminishReturn(Player killer, double amount) {
+        if (amount == 0) { return 0; }
         int ret = getConfig().getInt("economy.diminish.return");
         int depth = getConfig().getInt("economy.diminish.depth");
         int player = (int) Math.floor(killer.getLocation().getY());
         double diminish = ((depth - player) * ret);
         diminish = ((diminish > 0 ? diminish : 0) / 100);
         amount = (amount - (amount * (diminish)));
+        if (!(getConfig().get("economy.diminish.threshold") == null)) {
+            float atten = getManager().getKiller(killer.getName()).getAttenuation();
+            int thresh = getConfig().getInt("economy.diminish.threshold", 100);
+            if (atten > thresh) {
+                atten = (atten - thresh) / 100;
+                double tmp = amount;
+                amount = (amount - (amount * (atten > 0 ? atten : 0)));
+                debug("Attenuated " + tmp + " to " + amount + "... [Attenuation: " + atten + "]");
+            }
+        }
         return (amount > 0 ? amount : 0);
     }
 
