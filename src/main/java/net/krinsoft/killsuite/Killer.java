@@ -47,7 +47,7 @@ public class Killer {
 
     private void attenuate() {
         Integer total = totals.get(this.name);
-        totals.put(this.name, ++total);
+        totals.put(this.name, total != null ? ++total : 1);
     }
 
     public int getAttenuation() {
