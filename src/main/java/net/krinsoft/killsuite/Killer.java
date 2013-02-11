@@ -1,6 +1,7 @@
 package net.krinsoft.killsuite;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ public class Killer {
 
     private final int[] killed = new int[32];
 
-    private int kills = 0;
+    private static Map<String, Integer> totals = new HashMap<String, Integer>();
 
     public Killer(String name, Map<Monster, Integer> kills) {
         this.ID = name.hashCode();
@@ -45,15 +46,16 @@ public class Killer {
     }
 
     private void attenuate() {
-        kills++;
+        Integer total = totals.get(this.name);
+        totals.put(this.name, ++total);
     }
 
     public int getAttenuation() {
-        return kills;
+        return totals.get(this.name);
     }
 
     public void resetAttenuation() {
-        kills = 0;
+        totals.put(this.name, 0);
     }
 
     public long total() {
