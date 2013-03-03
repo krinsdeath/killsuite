@@ -1,9 +1,13 @@
 package net.krinsoft.killsuite;
 
 import com.fernferret.allpay.AllPay;
-import com.fernferret.allpay.GenericBank;
+import com.fernferret.allpay.commons.GenericBank;
 import com.pneumaticraft.commandhandler.CommandHandler;
-import net.krinsoft.killsuite.commands.*;
+import net.krinsoft.killsuite.commands.DebugCommand;
+import net.krinsoft.killsuite.commands.LeaderCommand;
+import net.krinsoft.killsuite.commands.PermissionsHandler;
+import net.krinsoft.killsuite.commands.ReloadCommand;
+import net.krinsoft.killsuite.commands.StatsCommand;
 import net.krinsoft.killsuite.listeners.EntityListener;
 import net.krinsoft.killsuite.listeners.PlayerListener;
 import net.krinsoft.killsuite.listeners.ServerListener;
