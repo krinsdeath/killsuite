@@ -305,10 +305,10 @@ public class KillSuite extends JavaPlugin {
 
     public void report(final Player p, final Monster m, final double amt, final boolean pet) {
         final KillSuite plugin = this;
-        getServer().getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
-            @Override
-            public void run() {
-                if (report) {
+        if (report) {
+            getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
+                @Override
+                public void run() {
                     String message = ChatColor.YELLOW + "[Kill] " + ChatColor.WHITE + (!pet ? "You" : "Your pet") + " killed a " + m.getFancyName();
                     if (getBank() != null && amt > 0) {
                         try {
@@ -324,8 +324,8 @@ public class KillSuite extends JavaPlugin {
                         p.sendMessage(message);
                     }
                 }
-            }
-        }, 1L);
+            }, 1L);
+        }
     }
     
     public void displayLeaderboards(CommandSender s, Monster m, int page) {
