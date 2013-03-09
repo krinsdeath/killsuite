@@ -221,6 +221,16 @@ public class KillSuite extends JavaPlugin {
                     "#   diminish->return:\n" +
                     "#     A value to deduct per kill per point of depth (as a percentage) from each kill\n" +
                     "#     Maximum of 100\n" +
+                    "#   diminish->threshold:\n" +
+                    "#     The number of kills a player is allowed, after which their economy rewards become\n" +
+                    "#     attenuated.\n" +
+                    "#     Default value: 100\n" +
+                    "#   diminish->maximum_attenuation:\n" +
+                    "#     The maximum percentage of attenuation applied to economy rewards.\n" +
+                    "#     Default (and max) value: 100\n" +
+                    "#   diminish->period:\n" +
+                    "#     The amount of time (in minutes) between attenuation resets.\n" +
+                    "#     Default value: 360 (6 hours)\n" +
                     "#\n" +
                     "# Contracts:\n" +
                     "#   If contracts is set to true, players will be able to create 'kill' contracts\n" +
@@ -272,6 +282,11 @@ public class KillSuite extends JavaPlugin {
         report = getConfig().getBoolean("plugin.report", true);
         worlds = getConfig().getStringList("plugin.exclude_worlds");
         profile = getConfig().getBoolean("plugin.profiler", false);
+
+        // economy attenuation
+        use_attenuation = getConfig().get("economy.diminish.threshold") != null;
+        threshold = getConfig().getInt("economy.diminish.threshold", 100);
+        maximum_attenuation = getConfig().getInt("economy.diminish.maximum_attenuation", 100);
     }
 
     private void registerCommands() {
@@ -442,6 +457,10 @@ public class KillSuite extends JavaPlugin {
         return !worlds.contains(world);
     }
 
+    private boolean use_attenuation = false;
+    private int threshold = 100;
+    private int maximum_attenuation = 100;
+
     public double diminishReturn(Player killer, double amount) {
         if (amount == 0) { return 0; }
         int ret = getConfig().getInt("economy.diminish.return");
@@ -450,11 +469,13 @@ public class KillSuite extends JavaPlugin {
         double diminish = ((depth - player) * ret);
         diminish = ((diminish > 0 ? diminish : 0) / 100);
         amount = (amount - (amount * (diminish)));
-        if (!(getConfig().get("economy.diminish.threshold") == null)) {
+        if (use_attenuation) {
             float atten = getManager().getKiller(killer.getName()).getAttenuation();
-            int thresh = getConfig().getInt("economy.diminish.threshold", 100);
-            if (atten > thresh) {
-                atten = (atten - thresh) / 100;
+            if (atten > threshold) {
+                atten = (atten - threshold) / 100;
+                if (atten > maximum_attenuation) {
+                    atten = maximum_attenuation;
+                }
                 double tmp = amount;
                 amount = (amount - (amount * (atten > 0 ? atten : 0)));
                 debug("Attenuated " + tmp + " to " + amount + "... [Attenuation: " + atten + "]");
