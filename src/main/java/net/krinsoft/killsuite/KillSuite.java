@@ -286,7 +286,7 @@ public class KillSuite extends JavaPlugin {
         // economy attenuation
         use_attenuation = getConfig().get("economy.diminish.threshold") != null;
         threshold = getConfig().getInt("economy.diminish.threshold", 100);
-        maximum_attenuation = getConfig().getInt("economy.diminish.maximum_attenuation", 100);
+        maximum_attenuation = getConfig().getInt("economy.diminish.maximum_attenuation", 100) / 100F;
     }
 
     private void registerCommands() {
@@ -459,7 +459,7 @@ public class KillSuite extends JavaPlugin {
 
     private boolean use_attenuation = false;
     private int threshold = 100;
-    private int maximum_attenuation = 100;
+    private float maximum_attenuation = 1.00f;
 
     public double diminishReturn(Player killer, double amount) {
         if (amount == 0) { return 0; }
